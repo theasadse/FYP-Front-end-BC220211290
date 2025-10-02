@@ -7,9 +7,11 @@ import { useAuth } from '../contexts/auth'
 const { Header, Sider, Content } = Layout
 
 const items = [
-  { key: 'dashboard', label: 'Dashboard' },
-  { key: 'activities', label: 'Activities' },
-  { key: 'reports', label: 'Reports' }
+  { key: '/admin', label: 'Dashboard' },
+  { key: '/admin/activities', label: 'Activities' },
+  { key: '/admin/reports', label: 'Reports' },
+  { key: '/admin/users', label: 'Users' },
+  { key: '/admin/roles', label: 'Roles' }
 ]
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -27,11 +29,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider collapsible collapsed={collapsed} onCollapse={(val) => setCollapsed(val)}>
+        <Sider collapsible collapsed={collapsed} onCollapse={(val) => setCollapsed(val)}>
         <div className="logo" style={{ color: 'white', padding: 16, textAlign: 'center' }}>
           FYP Panel
         </div>
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['dashboard']} items={items} />
+        <Menu
+          theme="dark"
+          mode="inline"
+          defaultSelectedKeys={[window.location.pathname]}
+          onClick={(e) => navigate(e.key)}
+          items={items}
+        />
       </Sider>
       <Layout>
         <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px' }}>

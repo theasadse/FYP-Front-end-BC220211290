@@ -7,6 +7,11 @@ import UserDashboard from './pages/UserDashboard'
 import ViewerDashboard from './pages/ViewerDashboard'
 import MainLayout from './components/MainLayout'
 import { AuthProvider, useAuth } from './contexts/auth'
+import UsersPage from './pages/UsersPage'
+import RolesPage from './pages/RolesPage'
+import SignupPage from './pages/SignupPage'
+import { ApolloProvider } from './graphql/client'
+import apolloClient from './graphql/client'
 
 function PrivateRoute({ children, role }: { children: React.ReactNode; role?: string }) {
   const { user } = useAuth()
@@ -17,43 +22,72 @@ function PrivateRoute({ children, role }: { children: React.ReactNode; role?: st
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Layout style={{ minHeight: '100vh' }}>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/admin/*"
-            element={
-              <PrivateRoute role="admin">
-                <MainLayout>
-                  <AdminDashboard />
-                </MainLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/user/*"
-            element={
-              <PrivateRoute role="user">
-                <MainLayout>
-                  <UserDashboard />
-                </MainLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/viewer/*"
-            element={
-              <PrivateRoute role="viewer">
-                <MainLayout>
-                  <ViewerDashboard />
-                </MainLayout>
-              </PrivateRoute>
-            }
-          />
-          <Route path="/" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Layout>
-    </AuthProvider>
+    <ApolloProvider client={apolloClient}>
+      <AuthProvider>
+        <Layout style={{ minHeight: '100vh' }}>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+
+            <Route
+              path="/admin/*"
+              element={
+                <PrivateRoute role="admin">
+                  <MainLayout>
+                    <AdminDashboard />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/admin/users"
+              element={
+                <PrivateRoute role="admin">
+                  <MainLayout>
+                    <UsersPage />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/admin/roles"
+              element={
+                <PrivateRoute role="admin">
+                  <MainLayout>
+                    <RolesPage />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/user/*"
+              element={
+                <PrivateRoute role="user">
+                  <MainLayout>
+                    <UserDashboard />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/viewer/*"
+              element={
+                <PrivateRoute role="viewer">
+                  <MainLayout>
+                    <ViewerDashboard />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+
+            <Route path="/" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </Layout>
+      </AuthProvider>
+    </ApolloProvider>
   )
 }

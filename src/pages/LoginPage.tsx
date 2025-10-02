@@ -1,5 +1,6 @@
 import React from 'react'
 import { Card, Button, Form, Input, Typography, Alert } from 'antd'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/auth'
 import { useNavigate } from 'react-router-dom'
 
@@ -23,7 +24,7 @@ export default function LoginPage() {
           FYP Admin Panel — Login
         </Title>
         {error && <Alert type="error" message={error} style={{ marginBottom: 12 }} />}
-        <Form name="login" onFinish={onFinish} layout="vertical">
+  <Form name="login" onFinish={onFinish} layout="vertical">
           <Form.Item
             label="Username"
             name="username"
@@ -45,6 +46,9 @@ export default function LoginPage() {
               Sign in
             </Button>
           </Form.Item>
+          <div style={{ textAlign: 'center' }}>
+            <Link to="/signup">Create an account</Link>
+          </div>
         </Form>
       </Card>
     </div>
