@@ -8,7 +8,7 @@ import ViewerDashboard from './pages/ViewerDashboard'
 import MainLayout from './components/MainLayout'
 import { AuthProvider, useAuth } from './contexts/auth'
 
-function PrivateRoute({ children, role }: { children: JSX.Element; role?: string }) {
+function PrivateRoute({ children, role }: { children: React.ReactNode; role?: string }) {
   const { user } = useAuth()
   if (!user) return <Navigate to="/login" replace />
   if (role && user.role !== role) return <Navigate to="/login" replace />
