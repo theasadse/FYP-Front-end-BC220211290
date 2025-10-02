@@ -12,6 +12,8 @@ import RolesPage from './pages/RolesPage'
 import SignupPage from './pages/SignupPage'
 import { ApolloProvider } from './graphql/client'
 import apolloClient from './graphql/client'
+import ActivitiesPage from './pages/ActivitiesPage'
+import ReportsPage from './pages/ReportsPage'
 
 function PrivateRoute({ children, role }: { children: React.ReactNode; role?: string }) {
   const { user } = useAuth()
@@ -46,6 +48,28 @@ export default function App() {
                 <PrivateRoute role="admin">
                   <MainLayout>
                     <UsersPage />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/admin/activities"
+              element={
+                <PrivateRoute role="admin">
+                  <MainLayout>
+                    <ActivitiesPage />
+                  </MainLayout>
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/admin/reports"
+              element={
+                <PrivateRoute role="admin">
+                  <MainLayout>
+                    <ReportsPage />
                   </MainLayout>
                 </PrivateRoute>
               }
