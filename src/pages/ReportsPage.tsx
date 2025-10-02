@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react'
-import { listActivities, exportActivitiesJSON } from '../services/mockApi'
 import { Button, Card, List } from 'antd'
+import { useQuery, useMutation } from '@apollo/client'
+import { ACTIVITIES } from '../graphql/operations/activities'
+import { REPORTS } from '../graphql/operations/reports'
 
 export default function ReportsPage() {
   const [activities, setActivities] = useState<any[]>([])
+  const { data: activitiesData } = useQuery(ACTIVITIES)
+  const [exportMut] = useMutation('exportActivities')
 
-  async function load() {
-    const a = await listActivities()
-    setActivities(a)
-  }
-
-  useEffect(() => { load() }, [])
+  useEffect(() => { if (activitiesData) setActivities(activitiesData) }, [activitiesData])
 
   async function onExport() {
-    const blob = new Blob([await exportActivitiesJSON()], { type: 'application/json' })
+    const raw = await exportMut()
+    const payload = typeof raw === 'string' ? raw : JSON.stringify(raw.data ?? raw)
+    const blob = new Blob([payload], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url

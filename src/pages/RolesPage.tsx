@@ -1,36 +1,30 @@
 import React, { useEffect, useState } from 'react'
-import { listRoles, createRole, deleteRole } from '../graphql/mockSchema'
 import { Table, Button, Modal, Form, Input, Popconfirm, message } from 'antd'
+import { useQuery, useMutation } from '@apollo/client'
+import { ROLES, CREATE_ROLE, DELETE_ROLE } from '../graphql/operations/roles'
 
 export default function RolesPage() {
   const [data, setData] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+  const { data: rolesData, loading } = useQuery(ROLES)
   const [visible, setVisible] = useState(false)
   const [form] = Form.useForm()
 
-  async function load() {
-    setLoading(true)
-    const r = await listRoles()
-    setData(r)
-    setLoading(false)
-  }
+  useEffect(() => { if (rolesData) setData(rolesData) }, [rolesData])
 
-  useEffect(() => {
-    load()
-  }, [])
-
+  const [createRoleMut] = useMutation(CREATE_ROLE)
+  const [deleteRoleMut] = useMutation(DELETE_ROLE)
   async function onDelete(id: string) {
-    await deleteRole(id)
+    await deleteRoleMut({ id })
     message.success('Role deleted')
-    load()
+    window.location.reload()
   }
 
   async function onOk() {
     const vals = await form.validateFields()
-    await createRole(vals.name)
+    await createRoleMut({ input: { name: vals.name } })
     message.success('Role created')
     setVisible(false)
-    load()
+    window.location.reload()
   }
 
   const columns = [

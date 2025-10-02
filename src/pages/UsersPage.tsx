@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from 'react'
-import { listUsers, createUser, updateUser, deleteUser, listRoles } from '../graphql/mockSchema'
 import { Table, Button, Modal, Form, Input, Select, Popconfirm, message } from 'antd'
+import { useQuery, useMutation } from '@apollo/client'
+import { USERS, CREATE_USER, UPDATE_USER, DELETE_USER } from '../graphql/operations/users'
 
 export default function UsersPage() {
   const [data, setData] = useState<any[]>([])
   const [roles, setRoles] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+  const { data: usersData, loading } = useQuery(USERS)
+  const { data: rolesData } = useQuery('roles')
   const [visible, setVisible] = useState(false)
   const [editing, setEditing] = useState<any | null>(null)
   const [form] = Form.useForm()
 
-  async function load() {
-    setLoading(true)
-    const [u, r] = await Promise.all([listUsers(), listRoles()])
-    setData(u)
-    setRoles(r)
-    setLoading(false)
-  }
+  useEffect(() => {
+    if (usersData) setData(usersData)
+  }, [usersData])
 
   useEffect(() => {
-    load()
-  }, [])
+    if (rolesData) setRoles(rolesData)
+  }, [rolesData])
 
   function onAdd() {
     setEditing(null)
@@ -34,23 +32,27 @@ export default function UsersPage() {
     setVisible(true)
   }
 
+  const [deleteUserMut] = useMutation(DELETE_USER)
   async function onDelete(id: string) {
-    await deleteUser(id)
+    await deleteUserMut({ id })
     message.success('User deleted')
-    load()
+    // refresh: rely on query hook to re-run (not implemented) so re-query manually by reloading
+    window.location.reload()
   }
 
+  const [createUserMut] = useMutation(CREATE_USER)
+  const [updateUserMut] = useMutation(UPDATE_USER)
   async function onOk() {
     const vals = await form.validateFields()
     if (editing) {
-      await updateUser(editing.id, vals)
+      await updateUserMut({ id: editing.id, input: vals })
       message.success('User updated')
     } else {
-      await createUser(vals)
+      await createUserMut({ input: { ...vals, email: vals.username } })
       message.success('User created')
     }
     setVisible(false)
-    load()
+    window.location.reload()
   }
 
   const columns = [

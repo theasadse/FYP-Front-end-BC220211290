@@ -3,6 +3,8 @@ import { Card, Button, Form, Input, Typography, Alert } from 'antd'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/auth'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from '@apollo/client'
+import { LOGIN } from '../graphql/operations/auth'
 
 const { Title } = Typography
 
@@ -10,11 +12,24 @@ export default function LoginPage() {
   const { login, isLoading, error } = useAuth()
   const navigate = useNavigate()
 
+  const [loginMut] = useMutation(LOGIN)
   const onFinish = async (values: { username: string; password: string }) => {
-    const res = await login(values.username, values.password)
-    if (res.ok && res.user) {
-      navigate(`/${res.user.role}`)
+    await login(values.username, values.password)
+    // read persisted user from localStorage (set by AuthProvider) to determine role
+    const raw = localStorage.getItem('fyp_auth')
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw)
+        const role = parsed?.user?.role
+        if (role) {
+          navigate(`/${role}`)
+          return
+        }
+      } catch (e) {
+        // fallthrough
+      }
     }
+    navigate('/')
   }
 
   return (

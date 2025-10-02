@@ -1,30 +1,23 @@
 import React, { useEffect, useState } from 'react'
-import { listActivities, createActivity } from '../services/mockApi'
 import { Table, Button, Modal, Form, Input, Select, message } from 'antd'
+import { useQuery, useMutation } from '@apollo/client'
+import { ACTIVITIES, LOG_ACTIVITY } from '../graphql/operations/activities'
 
 export default function ActivitiesPage() {
   const [data, setData] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+  const { data: activitiesData, loading } = useQuery(ACTIVITIES)
   const [visible, setVisible] = useState(false)
   const [form] = Form.useForm()
 
-  async function load() {
-    setLoading(true)
-    const a = await listActivities()
-    setData(a)
-    setLoading(false)
-  }
+  useEffect(() => { if (activitiesData) setData(activitiesData) }, [activitiesData])
 
-  useEffect(() => {
-    load()
-  }, [])
-
+  const [logActivityMut] = useMutation(LOG_ACTIVITY)
   async function onOk() {
     const vals = await form.validateFields()
-    await createActivity(vals)
+    await logActivityMut({ input: { userId: Number(vals.instructor_id), type: vals.activity, metadata: { note: vals['metadata.note'] } } })
     message.success('Activity logged')
     setVisible(false)
-    load()
+    window.location.reload()
   }
 
   const columns = [
