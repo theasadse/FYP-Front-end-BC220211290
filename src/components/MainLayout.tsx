@@ -30,8 +30,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <Layout style={{ minHeight: '100vh' }}>
         <Sider collapsible collapsed={collapsed} onCollapse={(val) => setCollapsed(val)}>
-        <div className="logo" style={{ color: 'white', padding: 16, textAlign: 'center' }}>
-          FYP Panel
+        <div className="logo" style={{ color: 'white', padding: 18, textAlign: 'center' }}>
+          <div style={{ background: 'rgba(255,255,255,0.06)', padding: '8px 12px', borderRadius: 8, display: 'inline-block' }}>FYP Panel</div>
         </div>
         <Menu
           theme="dark"
@@ -42,14 +42,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         />
       </Sider>
       <Layout>
-        <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px' }}>
+        <Header className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px' }}>
           <div>
             <Button type="text" onClick={() => setCollapsed(!collapsed)} icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />} />
           </div>
           <div>
             <Dropdown overlay={menu} trigger={["click"]}>
-              <div style={{ cursor: 'pointer' }}>
-                <Avatar icon={<UserOutlined />} style={{ marginRight: 8 }} /> {user?.name} ({user?.role})
+              <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Avatar icon={<UserOutlined />} style={{ marginRight: 8, background: '#fff', color: '#0f2a4a' }} />
+                <div style={{ color: '#ffffff' }}><div style={{ fontWeight: 700 }}>{user?.name}</div><div style={{ fontSize: 12, opacity: 0.85 }}>{user?.role}</div></div>
               </div>
             </Dropdown>
           </div>

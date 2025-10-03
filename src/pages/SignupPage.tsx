@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { Form, Input, Button, Select, message } from 'antd'
+import { Form, Input, Button, Select, message, Card, Typography } from 'antd'
 import { useMutation, useQuery } from '@apollo/client'
 import { REGISTER } from '../graphql/operations/auth'
+import { ROLES } from '../graphql/operations/roles'
 import { useNavigate } from 'react-router-dom'
+import { LeftOutlined } from '@ant-design/icons'
 
 export default function SignupPage() {
   const [roles, setRoles] = useState<any[]>([])
   const navigate = useNavigate()
 
-  const { data: rolesData } = useQuery('roles')
+  const { data: rolesData } = useQuery(ROLES)
   useEffect(() => { if (rolesData) setRoles(rolesData) }, [rolesData])
 
   const [register, { loading }] = useMutation(REGISTER)
@@ -21,9 +23,16 @@ export default function SignupPage() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 420 }}>
-        <h2>Create Account</h2>
+    <div className="form-center">
+      <Card style={{ width: 460, borderRadius: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8, gap: 12 }}>
+          <Button type="text" className="back-button" icon={<LeftOutlined />} onClick={() => navigate('/login')} />
+          <div>
+            <Typography.Title level={4} style={{ margin: 0 }}>Create Account</Typography.Title>
+            <div style={{ color: 'var(--muted, #5f6f88)', fontSize: 13 }}>Create a new user account</div>
+          </div>
+        </div>
+
         <Form layout="vertical" onFinish={onFinish}>
           <Form.Item name="username" label="Username" rules={[{ required: true }]}>
             <Input />
@@ -35,10 +44,10 @@ export default function SignupPage() {
             <Select options={roles.map((r) => ({ label: r.name, value: r.name }))} />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit">Create account</Button>
+            <Button type="primary" htmlType="submit" block loading={loading}>Create account</Button>
           </Form.Item>
         </Form>
-      </div>
+      </Card>
     </div>
   )
 }

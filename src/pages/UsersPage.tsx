@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react'
 import { Table, Button, Modal, Form, Input, Select, Popconfirm, message } from 'antd'
 import { useQuery, useMutation } from '@apollo/client'
 import { USERS, CREATE_USER, UPDATE_USER, DELETE_USER } from '../graphql/operations/users'
+import { ROLES } from '../graphql/operations/roles'
 
 export default function UsersPage() {
   const [data, setData] = useState<any[]>([])
   const [roles, setRoles] = useState<any[]>([])
   const { data: usersData, loading } = useQuery(USERS)
-  const { data: rolesData } = useQuery('roles')
+  const { data: rolesData } = useQuery(ROLES)
   const [visible, setVisible] = useState(false)
   const [editing, setEditing] = useState<any | null>(null)
   const [form] = Form.useForm()
