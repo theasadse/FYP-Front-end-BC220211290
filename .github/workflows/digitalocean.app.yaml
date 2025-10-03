@@ -1,0 +1,11 @@
+name: your-app-name
+services:
+- name: web
+  source_dir: /
+  environment_slug: node-js
+  github:
+    repo: your-repo
+    branch: main
+  run_command: npm run start
+  build_command: npm run build
+  http_port: 8080
