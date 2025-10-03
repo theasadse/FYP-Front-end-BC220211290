@@ -7,5 +7,7 @@ export default function ViewerDashboard() {
       <h2>Viewer Dashboard</h2>
       <Card>Read-only access. View reports and activity summaries here.</Card>
     </div>
+
+    
   )
 }
