@@ -1,32 +1,38 @@
-import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { Layout } from 'antd'
-import LoginPage from './pages/LoginPage'
-import AdminDashboard from './pages/AdminDashboard'
-import UserDashboard from './pages/UserDashboard'
-import ViewerDashboard from './pages/ViewerDashboard'
-import MainLayout from './components/MainLayout'
-import { AuthProvider, useAuth } from './contexts/auth'
-import UsersPage from './pages/UsersPage'
-import RolesPage from './pages/RolesPage'
-import SignupPage from './pages/SignupPage'
-import { ApolloProvider } from '@apollo/client'
-import apolloClient from './graphql/apolloClient'
-import ActivitiesPage from './pages/ActivitiesPage'
-import ReportsPage from './pages/ReportsPage'
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { Layout } from "antd";
+import LoginPage from "./pages/LoginPage";
+import AdminDashboard from "./pages/AdminDashboard";
+import UserDashboard from "./pages/UserDashboard";
+import ViewerDashboard from "./pages/ViewerDashboard";
+import MainLayout from "./components/MainLayout";
+import { AuthProvider, useAuth } from "./contexts/auth";
+import UsersPage from "./pages/UsersPage";
+import RolesPage from "./pages/RolesPage";
+import SignupPage from "./pages/SignupPage";
+import { ApolloProvider } from "@apollo/client";
+import apolloClient from "./graphql/apolloClient";
+import ActivitiesPage from "./pages/ActivitiesPage";
+import ReportsPage from "./pages/ReportsPage";
 
-function PrivateRoute({ children, role }: { children: React.ReactNode; role?: string }) {
-  const { user } = useAuth()
-  if (!user) return <Navigate to="/login" replace />
-  if (role && user.role !== role) return <Navigate to="/login" replace />
-  return children
+function PrivateRoute({
+  children,
+  role,
+}: {
+  children: React.ReactNode;
+  role?: string;
+}) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  if (role && user.role !== role) return <Navigate to="/login" replace />;
+  return children;
 }
 
 export default function App() {
   return (
     <ApolloProvider client={apolloClient}>
       <AuthProvider>
-        <Layout style={{ minHeight: '100vh' }}>
+        <Layout style={{ minHeight: "100vh" }}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
@@ -113,5 +119,5 @@ export default function App() {
         </Layout>
       </AuthProvider>
     </ApolloProvider>
-  )
+  );
 }
