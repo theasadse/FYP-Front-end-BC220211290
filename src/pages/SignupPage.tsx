@@ -9,21 +9,39 @@ import { LeftOutlined } from '@ant-design/icons'
 export default function SignupPage() {
   const [roles, setRoles] = useState<any[]>([])
   const navigate = useNavigate()
+  const [messageApi, contextHolder] = message.useMessage()
 
   const { data: rolesData } = useQuery(ROLES)
   useEffect(() => { if (rolesData) setRoles(rolesData) }, [rolesData])
 
   const [register, { loading }] = useMutation(REGISTER)
   const onFinish = async (vals: any) => {
-    const res = await register({ input: vals })
-    if (res.data) {
-      message.success('Account created. Please sign in.')
-      navigate('/login')
+    const hide = messageApi.loading('Creating account...', 0)
+    try {
+      const res = await register({ 
+        variables: { 
+          input: {
+            email: vals.username,
+            name: vals.name,
+            password: vals.password || 'defaultPassword123',
+            roleName: vals.role
+          }
+        } 
+      })
+      hide()
+      if (res.data) {
+        messageApi.success('Account created successfully. Please sign in.')
+        setTimeout(() => navigate('/login'), 1000)
+      }
+    } catch (error: any) {
+      hide()
+      messageApi.error(error.message || 'Failed to create account')
     }
   }
 
   return (
     <div className="form-center">
+      {contextHolder}
       <Card style={{ width: 460, borderRadius: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8, gap: 12 }}>
           <Button type="text" className="back-button" icon={<LeftOutlined />} onClick={() => navigate('/login')} />
@@ -39,6 +57,9 @@ export default function SignupPage() {
           </Form.Item>
           <Form.Item name="name" label="Full name" rules={[{ required: true }]}>
             <Input />
+          </Form.Item>
+          <Form.Item name="password" label="Password" rules={[{ required: true, min: 6 }]}>
+            <Input.Password />
           </Form.Item>
           <Form.Item name="role" label="Role" rules={[{ required: true }]}>
             <Select options={roles.map((r) => ({ label: r.name, value: r.name }))} />

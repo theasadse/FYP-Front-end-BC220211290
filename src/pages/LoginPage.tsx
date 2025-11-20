@@ -14,6 +14,27 @@ export default function LoginPage() {
 
   const [loginMut] = useMutation(LOGIN)
   const onFinish = async (values: { username: string; password: string }) => {
+    // Use the mutation directly with proper variables
+    const result = await loginMut({
+      variables: {
+        input: {
+          email: values.username,
+          password: values.password
+        }
+      }
+    })
+    
+    if (result.data?.login) {
+      const { token, user } = result.data.login
+      localStorage.setItem('fyp_auth', JSON.stringify({ token, user }))
+      const role = user?.role?.name
+      if (role) {
+        navigate(`/${role}`)
+        return
+      }
+    }
+    
+    // Fallback to auth context method
     await login(values.username, values.password)
     // read persisted user from localStorage (set by AuthProvider) to determine role
     const raw = localStorage.getItem('fyp_auth')

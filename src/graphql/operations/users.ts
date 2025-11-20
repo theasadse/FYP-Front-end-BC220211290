@@ -1,8 +1,68 @@
 import { gql } from '@apollo/client'
 
-export const USERS = gql`query Users { users { id name email role { id name } createdAt } }`
-export const USER = gql`query User($id: Int!) { user(id: $id) { id name email role { id name } createdAt } }`
+// Query 9/11: Users
+export const USERS = gql`
+  query Users {
+    users {
+      id
+      name
+      email
+      role {
+        name
+        id
+      }
+    }
+  }
+`
 
-export const CREATE_USER = gql`mutation CreateUser($input: RegisterInput!) { createUser(input: $input) { id name email role { id name } createdAt } }`
-export const UPDATE_USER = gql`mutation UpdateUser($id: Int!, $input: UserInput!) { updateUser(id: $id, input: $input) { id name email role { id name } createdAt } }`
-export const DELETE_USER = gql`mutation DeleteUser($id: Int!) { deleteUser(id: $id) { id } }`
+// Query 10/11: User (single)
+export const USER = gql`
+  query User($userId: ID!) {
+    user(id: $userId) {
+      id
+      name
+      email
+      role {
+        id
+        name
+      }
+    }
+  }
+`
+
+// Mutation 3/14: CreateUser
+export const CREATE_USER = gql`
+  mutation CreateUser($input: CreateUserInput!) {
+    createUser(input: $input) {
+      id
+      name
+      email
+      role {
+        id
+        name
+      }
+    }
+  }
+`
+
+// Mutation 4/14: UpdateUser
+export const UPDATE_USER = gql`
+  mutation UpdateUser($updateUserId: ID!, $input: UpdateUserInput!) {
+    updateUser(id: $updateUserId, input: $input) {
+      id
+      name
+      email
+      role {
+        name
+        id
+      }
+    }
+  }
+`
+
+// Mutation 5/14: DeleteUser
+export const DELETE_USER = gql`
+  mutation DeleteUser($deleteUserId: ID!) {
+    deleteUser(id: $deleteUserId)
+  }
+`

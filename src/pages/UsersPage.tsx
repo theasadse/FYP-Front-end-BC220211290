@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Table, Button, Modal, Form, Input, Select, Popconfirm, message } from 'antd'
+import { Table, Button, Modal, Form, Input, Select, Popconfirm, message, Tag } from 'antd'
 import { useQuery, useMutation } from '@apollo/client'
 import { USERS, CREATE_USER, UPDATE_USER, DELETE_USER } from '../graphql/operations/users'
 import { ROLES } from '../graphql/operations/roles'
@@ -12,13 +12,14 @@ export default function UsersPage() {
   const [visible, setVisible] = useState(false)
   const [editing, setEditing] = useState<any | null>(null)
   const [form] = Form.useForm()
+  const [messageApi, contextHolder] = message.useMessage()
 
   useEffect(() => {
-    if (usersData) setData(usersData)
+    if (usersData?.users) setData(usersData.users)
   }, [usersData])
 
   useEffect(() => {
-    if (rolesData) setRoles(rolesData)
+    if (rolesData?.roles) setRoles(rolesData.roles)
   }, [rolesData])
 
   function onAdd() {
@@ -33,36 +34,69 @@ export default function UsersPage() {
     setVisible(true)
   }
 
-  const [deleteUserMut] = useMutation(DELETE_USER)
+  const [deleteUserMut, { loading: deleteLoading }] = useMutation(DELETE_USER)
   async function onDelete(id: string) {
-    await deleteUserMut({ id })
-    message.success('User deleted')
-    // refresh: rely on query hook to re-run (not implemented) so re-query manually by reloading
-    window.location.reload()
+    const hide = messageApi.loading('Deleting user...', 0)
+    try {
+      await deleteUserMut({ variables: { deleteUserId: id } })
+      hide()
+      messageApi.success('User deleted successfully')
+      setTimeout(() => window.location.reload(), 500)
+    } catch (error: any) {
+      hide()
+      messageApi.error(error.message || 'Failed to delete user')
+    }
   }
 
-  const [createUserMut] = useMutation(CREATE_USER)
-  const [updateUserMut] = useMutation(UPDATE_USER)
+  const [createUserMut, { loading: createLoading }] = useMutation(CREATE_USER)
+  const [updateUserMut, { loading: updateLoading }] = useMutation(UPDATE_USER)
   async function onOk() {
-    const vals = await form.validateFields()
-    if (editing) {
-      await updateUserMut({ id: editing.id, input: vals })
-      message.success('User updated')
-    } else {
-      await createUserMut({ input: { ...vals, email: vals.username } })
-      message.success('User created')
+    try {
+      const vals = await form.validateFields()
+      const hide = messageApi.loading(editing ? 'Updating user...' : 'Creating user...', 0)
+      
+      if (editing) {
+        await updateUserMut({ variables: { updateUserId: editing.id, input: vals } })
+        hide()
+        messageApi.success('User updated successfully')
+      } else {
+        await createUserMut({ variables: { input: vals } })
+        hide()
+        messageApi.success('User created successfully')
+      }
+      setVisible(false)
+      setTimeout(() => window.location.reload(), 500)
+    } catch (error: any) {
+      messageApi.error(error.message || 'Operation failed')
     }
-    setVisible(false)
-    window.location.reload()
   }
+
+  const isSaving = createLoading || updateLoading
 
   const columns = [
-    { title: 'ID', dataIndex: 'id' },
-    { title: 'Username', dataIndex: 'username' },
-    { title: 'Name', dataIndex: 'name' },
-    { title: 'Role', dataIndex: 'role' },
+    { 
+      title: 'ID', 
+      dataIndex: 'id',
+      width: 80
+    },
+    { 
+      title: 'Name', 
+      dataIndex: 'name'
+    },
+    { 
+      title: 'Email', 
+      dataIndex: 'email'
+    },
+    { 
+      title: 'Role', 
+      dataIndex: ['role', 'name'],
+      render: (role: string) => (
+        <Tag color="blue">{role || 'N/A'}</Tag>
+      )
+    },
     {
       title: 'Actions',
+      width: 180,
       render: (_: any, record: any) => (
         <>
           <Button type="link" onClick={() => onEdit(record)}>
@@ -79,23 +113,48 @@ export default function UsersPage() {
   ]
 
   return (
-    <div>
-      <h2>Manage Users</h2>
-      <Button type="primary" style={{ marginBottom: 12 }} onClick={onAdd}>
-        New User
-      </Button>
-      <Table rowKey="id" dataSource={data} columns={columns} loading={loading} />
+    <div style={{ padding: '24px' }}>
+      {contextHolder}
+      <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ margin: 0 }}>Manage Users</h2>
+          <p style={{ color: '#8c8c8c', margin: '4px 0 0 0' }}>Create, update, and manage user accounts</p>
+        </div>
+        <Button type="primary" onClick={onAdd} size="large">
+          New User
+        </Button>
+      </div>
+      <Table 
+        rowKey="id" 
+        dataSource={data} 
+        columns={columns} 
+        loading={loading}
+        pagination={{ 
+          pageSize: 10,
+          showSizeChanger: true,
+          showTotal: (total) => `Total ${total} users`
+        }}
+        style={{ backgroundColor: '#fff', borderRadius: '8px' }}
+      />
 
-      <Modal title={editing ? 'Edit User' : 'New User'} open={visible} onOk={onOk} onCancel={() => setVisible(false)}>
+      <Modal title={editing ? 'Edit User' : 'New User'} open={visible} onOk={onOk} onCancel={() => setVisible(false)} confirmLoading={isSaving}>
         <Form form={form} layout="vertical">
-          <Form.Item name="username" label="Username" rules={[{ required: true }]}>
-            <Input />
+          <Form.Item name="name" label="Full Name" rules={[{ required: true }]}>
+            <Input placeholder="Enter full name" />
           </Form.Item>
-          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
-            <Input />
+          <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
+            <Input placeholder="Enter email address" />
           </Form.Item>
-          <Form.Item name="role" label="Role" rules={[{ required: true }]}>
-            <Select options={roles.map((r) => ({ label: r.name, value: r.name }))} />
+          {!editing && (
+            <Form.Item name="password" label="Password" rules={[{ required: true, min: 6 }]}>
+              <Input.Password placeholder="Enter password (min 6 characters)" />
+            </Form.Item>
+          )}
+          <Form.Item name="roleName" label="Role" rules={[{ required: true }]}>
+            <Select 
+              placeholder="Select a role"
+              options={roles.map((r) => ({ label: r.name, value: r.name }))} 
+            />
           </Form.Item>
         </Form>
       </Modal>
