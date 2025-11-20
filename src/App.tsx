@@ -23,9 +23,18 @@ function PrivateRoute({
   role?: string;
 }) {
   const { user } = useAuth();
+
   if (!user) return <Navigate to="/login" replace />;
-  if (role && user.role !== role) return <Navigate to="/login" replace />;
-  return children;
+
+  // Handle both role as string and role as object
+  const userRole = typeof user.role === "string" ? user.role : user.role?.name;
+
+  if (role && userRole !== role) {
+    console.log("Role mismatch:", { required: role, actual: userRole });
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
 }
 
 export default function App() {

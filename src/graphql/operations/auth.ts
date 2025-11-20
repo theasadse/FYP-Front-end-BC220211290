@@ -24,10 +24,6 @@ export const REGISTER = gql`
         id
         name
         email
-        role {
-          id
-          name
-        }
       }
     }
   }

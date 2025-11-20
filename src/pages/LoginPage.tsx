@@ -14,40 +14,51 @@ export default function LoginPage() {
 
   const [loginMut] = useMutation(LOGIN);
   const onFinish = async (values: { username: string; password: string }) => {
-    // Use the mutation directly with proper variables
-    const result = await loginMut({
-      variables: {
-        input: {
-          email: values.username,
-          password: values.password,
+    try {
+      // Use the mutation directly with proper variables
+      const result = await loginMut({
+        variables: {
+          input: {
+            email: values.username,
+            password: values.password,
+          },
         },
-      },
-    });
+      });
 
-    if (result.data?.login) {
-      const { token, user } = result.data.login;
-      localStorage.setItem("fyp_auth", JSON.stringify({ token, user }));
-      const role = user?.role?.name;
-      if (role) {
-        navigate(`/${role}`);
-        return;
+      if (result.data?.login) {
+        const { token, user } = result.data.login;
+
+        // Store auth data in localStorage
+        localStorage.setItem("fyp_auth", JSON.stringify({ token, user }));
+
+        // Get role name from the nested role object
+        const roleName = user?.role?.name;
+
+        console.log("Login successful:", { user, roleName });
+
+        if (roleName) {
+          // Navigate based on role
+          navigate(`/${roleName}`);
+          return;
+        }
       }
+    } catch (error) {
+      console.error("Login error:", error);
     }
 
-    // Fallback to auth context method
+    // Fallback to auth context method if GraphQL fails
     await login(values.username, values.password);
-    // read persisted user from localStorage (set by AuthProvider) to determine role
     const raw = localStorage.getItem("fyp_auth");
     if (raw) {
       try {
         const parsed = JSON.parse(raw);
-        const role = parsed?.user?.role;
-        if (role) {
-          navigate(`/${role}`);
+        const roleName = parsed?.user?.role?.name || parsed?.user?.role;
+        if (roleName) {
+          navigate(`/${roleName}`);
           return;
         }
       } catch (e) {
-        // fallthrough
+        console.error("Parse error:", e);
       }
     }
     navigate("/");

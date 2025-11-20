@@ -31,13 +31,13 @@ export default function ReportsPage() {
   const [editing, setEditing] = useState<any | null>(null);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-  const [exportMut] = useMutation("exportActivities");
 
   useEffect(() => {
-    if (activitiesData) setActivities(activitiesData);
+    if (activitiesData?.activities) setActivities(activitiesData.activities);
   }, [activitiesData]);
+
   useEffect(() => {
-    if (reportsData) setReports(reportsData.reports || []);
+    if (reportsData?.reports) setReports(reportsData.reports);
   }, [reportsData]);
 
   function onAdd() {
@@ -122,9 +122,8 @@ export default function ReportsPage() {
   const isSaving = createLoading || updateLoading;
 
   async function onExport() {
-    const raw = await exportMut();
-    const payload =
-      typeof raw === "string" ? raw : JSON.stringify(raw.data ?? raw);
+    // Export activities data as JSON
+    const payload = JSON.stringify(activities, null, 2);
     const blob = new Blob([payload], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
