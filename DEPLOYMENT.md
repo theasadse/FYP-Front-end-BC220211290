@@ -3,6 +3,7 @@
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js >= 18.0.0
 - npm >= 9.0.0
 - Digital Ocean Account
@@ -12,17 +13,20 @@
 ### Option 1: Using Digital Ocean App Platform (Recommended)
 
 1. **Connect Your Repository**
+
    - Go to Digital Ocean App Platform
    - Click "Create App"
    - Connect your GitHub repository
    - Select the branch: `main`
 
 2. **Configure Build Settings**
+
    - Build Command: `npm run build`
    - Run Command: `npm start`
    - HTTP Port: `8080`
 
 3. **Environment Variables** (if needed)
+
    - Add your environment variables in the App Platform dashboard
    - Example:
      ```
@@ -47,17 +51,22 @@ npm start
 ## Configuration Files
 
 ### `.do/app.yaml`
+
 Digital Ocean App Platform configuration file with all necessary settings.
 
 ### `server.js`
+
 Express server that:
+
 - Serves static files from `dist/`
 - Handles SPA routing
 - Manages favicon requests
 - Binds to `0.0.0.0` for proper cloud deployment
 
 ### `vite.config.ts`
+
 Vite build configuration with:
+
 - Production optimizations
 - Code splitting
 - Asset management
@@ -65,19 +74,25 @@ Vite build configuration with:
 ## Troubleshooting
 
 ### Issue: 404 errors for assets
-**Solution:** 
+
+**Solution:**
+
 - Ensure `base: '/'` in vite.config.ts
 - Clear browser cache
 - Rebuild the application
 
 ### Issue: Blank page after deployment
+
 **Solution:**
+
 - Check browser console for errors
 - Verify API endpoints are correct
 - Check CORS settings on your backend
 
 ### Issue: Favicon not found
+
 **Solution:**
+
 - The server now handles missing favicon gracefully
 - Default favicon is in `/public/vite.svg`
 - Customize by replacing this file
@@ -102,6 +117,7 @@ Vite build configuration with:
 ## Support
 
 For issues or questions:
+
 1. Check the browser console for errors
 2. Review server logs in Digital Ocean dashboard
 3. Verify all build steps completed successfully
