@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from "@apollo/client";
 
 // Query 5/11: Me (current user)
 export const ME = gql`
@@ -13,7 +13,7 @@ export const ME = gql`
       }
     }
   }
-`
+`;
 
 // Mutation 1/14: Register
 export const REGISTER = gql`
@@ -31,7 +31,7 @@ export const REGISTER = gql`
       }
     }
   }
-`
+`;
 
 // Mutation 2/14: Login
 export const LOGIN = gql`
@@ -48,4 +48,4 @@ export const LOGIN = gql`
       }
     }
   }
-`
+`;

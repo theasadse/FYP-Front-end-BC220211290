@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from "@apollo/client";
 
 // Query 8/11: Roles
 export const ROLES = gql`
@@ -8,7 +8,7 @@ export const ROLES = gql`
       name
     }
   }
-`
+`;
 
 // Mutation 6/14: CreateRole
 export const CREATE_ROLE = gql`
@@ -18,7 +18,7 @@ export const CREATE_ROLE = gql`
       name
     }
   }
-`
+`;
 
 // Mutation 7/14: UpdateRole
 export const UPDATE_ROLE = gql`
@@ -28,11 +28,11 @@ export const UPDATE_ROLE = gql`
       name
     }
   }
-`
+`;
 
 // Mutation 8/14: DeleteRole
 export const DELETE_ROLE = gql`
   mutation DeleteRole($deleteRoleId: ID!) {
     deleteRole(id: $deleteRoleId)
   }
-`
+`;

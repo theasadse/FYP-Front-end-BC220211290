@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from "@apollo/client";
 
 // Query 6/11: Reports
 export const REPORTS = gql`
@@ -15,7 +15,7 @@ export const REPORTS = gql`
       content
     }
   }
-`
+`;
 
 // Query 7/11: Report (single)
 export const REPORT = gql`
@@ -32,7 +32,7 @@ export const REPORT = gql`
       content
     }
   }
-`
+`;
 
 // Mutation 12/14: CreateReport
 export const CREATE_REPORT = gql`
@@ -49,7 +49,7 @@ export const CREATE_REPORT = gql`
       content
     }
   }
-`
+`;
 
 // Mutation 13/14: UpdateReport
 export const UPDATE_REPORT = gql`
@@ -65,7 +65,7 @@ export const UPDATE_REPORT = gql`
       content
     }
   }
-`
+`;
 
 // Mutation 14/14: DeleteReport
 export const DELETE_REPORT = gql`
@@ -82,4 +82,4 @@ export const DELETE_REPORT = gql`
       content
     }
   }
-`
+`;

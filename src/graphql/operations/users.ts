@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from "@apollo/client";
 
 // Query 9/11: Users
 export const USERS = gql`
@@ -13,7 +13,7 @@ export const USERS = gql`
       }
     }
   }
-`
+`;
 
 // Query 10/11: User (single)
 export const USER = gql`
@@ -28,7 +28,7 @@ export const USER = gql`
       }
     }
   }
-`
+`;
 
 // Mutation 3/14: CreateUser
 export const CREATE_USER = gql`
@@ -43,7 +43,7 @@ export const CREATE_USER = gql`
       }
     }
   }
-`
+`;
 
 // Mutation 4/14: UpdateUser
 export const UPDATE_USER = gql`
@@ -58,11 +58,11 @@ export const UPDATE_USER = gql`
       }
     }
   }
-`
+`;
 
 // Mutation 5/14: DeleteUser
 export const DELETE_USER = gql`
   mutation DeleteUser($deleteUserId: ID!) {
     deleteUser(id: $deleteUserId)
   }
-`
+`;
