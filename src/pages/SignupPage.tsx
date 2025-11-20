@@ -12,8 +12,10 @@ export default function SignupPage() {
   const [messageApi, contextHolder] = message.useMessage();
 
   const { data: rolesData } = useQuery(ROLES);
+
+  console.log(rolesData);
   useEffect(() => {
-    if (rolesData) setRoles(rolesData);
+    if (rolesData) setRoles(rolesData.roles);
   }, [rolesData]);
 
   const [register, { loading }] = useMutation(REGISTER);
@@ -89,7 +91,7 @@ export default function SignupPage() {
           </Form.Item>
           <Form.Item name="role" label="Role" rules={[{ required: true }]}>
             <Select
-              options={roles.map((r) => ({ label: r.name, value: r.name }))}
+              options={roles?.map((r) => ({ label: r.name, value: r.name }))}
             />
           </Form.Item>
           <Form.Item>
