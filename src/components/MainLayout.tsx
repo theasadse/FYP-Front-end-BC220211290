@@ -1,5 +1,5 @@
 import React from "react";
-import { Layout, Menu, Dropdown, Avatar, Button, theme } from "antd";
+import { Layout, Menu, Dropdown, Avatar, Button, theme, Breadcrumb, Badge, Tooltip } from "antd";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -10,15 +10,15 @@ import {
   TeamOutlined,
   SafetyCertificateOutlined,
   LogoutOutlined,
+  BellOutlined
 } from "@ant-design/icons";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
 
 const { Header, Sider, Content } = Layout;
 
 /**
  * Navigation menu items configuration.
- * Each item contains a key (route path) and a label (display text).
  */
 const items = [
   { key: "/admin", label: "Dashboard", icon: <DashboardOutlined /> },
@@ -33,10 +33,9 @@ const items = [
  *
  * This layout includes:
  * - A collapsible sidebar with navigation menu.
- * - A header with a toggle button for the sidebar and a user dropdown profile.
- * - A content area where child components are rendered.
- *
- * It uses the `useAuth` hook to get current user information and handle logout.
+ * - A header with a toggle button, notifications, and user profile.
+ * - Breadcrumbs for navigation context.
+ * - A content area.
  *
  * @param {object} props - The component props.
  * @param {React.ReactNode} props.children - The content to render inside the main layout.
@@ -74,6 +73,19 @@ export default function MainLayout({
     </Menu>
   );
 
+  // Generate breadcrumb items based on current path
+  const pathSnippets = location.pathname.split("/").filter((i) => i);
+  const breadcrumbItems = [
+    { title: <Link to="/">Home</Link> },
+    ...pathSnippets.map((_, index) => {
+      const url = `/${pathSnippets.slice(0, index + 1).join("/")}`;
+      const title = pathSnippets[index].charAt(0).toUpperCase() + pathSnippets[index].slice(1);
+      return {
+        title: index === pathSnippets.length - 1 ? title : <Link to={url}>{title}</Link>,
+      };
+    }),
+  ];
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
@@ -88,6 +100,7 @@ export default function MainLayout({
           top: 0,
           bottom: 0,
           zIndex: 100,
+          boxShadow: "2px 0 8px 0 rgba(29,35,41,.05)",
         }}
       >
         <div
@@ -106,7 +119,9 @@ export default function MainLayout({
             fontSize: collapsed ? "12px" : "16px",
             whiteSpace: "nowrap",
             overflow: "hidden",
+            cursor: "pointer",
           }}
+          onClick={() => navigate("/")}
         >
           {collapsed ? "FYP" : "FYP Panel"}
         </div>
@@ -132,17 +147,28 @@ export default function MainLayout({
             boxShadow: "0 1px 4px rgba(0,21,41,0.08)",
           }}
         >
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{
-              fontSize: "16px",
-              width: 64,
-              height: 64,
-            }}
-          />
           <div style={{ display: "flex", alignItems: "center" }}>
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              style={{
+                fontSize: "16px",
+                width: 64,
+                height: 64,
+                marginRight: 16
+              }}
+            />
+            <Breadcrumb items={breadcrumbItems} />
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+             <Tooltip title="Notifications">
+              <Badge count={3} size="small" offset={[2, 2]}>
+                <Button type="text" icon={<BellOutlined style={{ fontSize: 18 }} />} style={{ display: "flex", alignItems: "center", justifyContent: "center" }} />
+              </Badge>
+            </Tooltip>
+
             <Dropdown overlay={menu} trigger={["click"]} placement="bottomRight">
               <div
                 style={{
@@ -150,7 +176,7 @@ export default function MainLayout({
                   display: "flex",
                   alignItems: "center",
                   gap: 12,
-                  padding: "4px 12px",
+                  padding: "4px 8px",
                   borderRadius: "6px",
                   transition: "background 0.3s",
                 }}
@@ -161,7 +187,8 @@ export default function MainLayout({
                   icon={<UserOutlined />}
                   size="default"
                 />
-                <div style={{ lineHeight: "1.2" }}>
+                <div style={{ lineHeight: "1.2", display: "none" }}>
+                   {/* Hide text on small screens if needed, but flex keeps it okay usually */}
                   <div style={{ fontWeight: 600, color: "#262626" }}>{user?.name || "User"}</div>
                   <div style={{ fontSize: 12, color: "#8c8c8c" }}>
                     {typeof userRole === "string" ? userRole.toUpperCase() : userRole}

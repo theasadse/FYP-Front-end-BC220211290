@@ -3,23 +3,28 @@ import {
   Card,
   Row,
   Col,
-  List,
   Avatar,
   Tag,
-  Spin,
   Typography,
   Statistic,
-  Badge,
+  Timeline,
+  Progress,
+  Button,
+  Skeleton,
+  Empty
 } from "antd";
 import {
   UserOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   BarChartOutlined,
+  PlusOutlined,
+  ArrowRightOutlined
 } from "@ant-design/icons";
 import { useQuery } from "@apollo/client";
 import { ME } from "../graphql/operations/auth";
 import { GET_ACTIVITIES } from "../graphql/operations/activities";
+import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
@@ -30,11 +35,13 @@ const { Title, Text } = Typography;
  * Capabilities:
  * - Shows a welcome banner with user details.
  * - Displays statistics on completed and pending activities.
- * - Lists the user's recent activities.
+ * - Lists the user's recent activities using a Timeline.
+ * - Shows performance progress.
  *
  * @returns {JSX.Element} The rendered User Dashboard.
  */
 export default function UserDashboard() {
+  const navigate = useNavigate();
   const { data: userData, loading: userLoading } = useQuery(ME);
   const { data: activitiesData, loading: activitiesLoading } = useQuery(
     GET_ACTIVITIES,
@@ -46,18 +53,18 @@ export default function UserDashboard() {
 
   const user = userData?.me;
   const activities = activitiesData?.getActivities || [];
+  const isLoading = userLoading || activitiesLoading;
 
-  if (userLoading || activitiesLoading) {
+  if (isLoading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "400px",
-        }}
-      >
-        <Spin size="large" tip="Loading your dashboard..." />
+      <div style={{ padding: "24px" }}>
+        <Skeleton active avatar paragraph={{ rows: 2 }} />
+        <div style={{ marginTop: 32 }}>
+          <Skeleton.Button active size="large" block style={{ height: 100 }} />
+        </div>
+        <div style={{ marginTop: 32 }}>
+           <Skeleton active paragraph={{ rows: 6 }} />
+        </div>
       </div>
     );
   }
@@ -68,14 +75,21 @@ export default function UserDashboard() {
   const pendingCount = activities.filter(
     (a: any) => a.status === "pending"
   ).length;
+  const totalCount = activities.length;
+  const completionRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
     <div>
-       <div style={{ marginBottom: "24px" }}>
-        <Title level={2} style={{ marginBottom: "8px" }}>User Dashboard</Title>
-        <Text type="secondary">
-          Track your progress and manage your daily tasks.
-        </Text>
+       <div style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <Title level={2} style={{ marginBottom: "8px", margin: 0 }}>User Dashboard</Title>
+          <Text type="secondary">
+            Track your progress and manage your daily tasks.
+          </Text>
+        </div>
+        <Button type="primary" icon={<PlusOutlined />} size="large" onClick={() => { /* Placeholder for action */ }}>
+            Quick Log
+        </Button>
       </div>
 
       <Card
@@ -106,113 +120,94 @@ export default function UserDashboard() {
               </Text>
             </div>
           </Col>
+          <Col>
+             <div style={{ textAlign: "right", color: "white" }}>
+                <div style={{ fontSize: 12, opacity: 0.8 }}>Completion Rate</div>
+                <div style={{ fontSize: 24, fontWeight: "bold" }}>{completionRate}%</div>
+             </div>
+          </Col>
         </Row>
       </Card>
 
-      <Row gutter={[24, 24]} style={{ marginBottom: "24px" }}>
-        <Col xs={24} sm={8}>
-          <Card
-            hoverable
-            style={{ borderRadius: "8px", height: "100%" }}
-            bodyStyle={{ padding: "24px" }}
-          >
-            <Statistic
-              title="Total Tasks"
-              value={activities.length}
-              prefix={<BarChartOutlined style={{ color: "#1890ff", backgroundColor: "#e6f7ff", padding: 8, borderRadius: "50%" }} />}
-              valueStyle={{ fontWeight: 600 }}
-            />
-          </Card>
+      <Row gutter={[24, 24]}>
+        {/* Left Column: Stats & Performance */}
+        <Col xs={24} lg={8}>
+            <Row gutter={[24, 24]}>
+                <Col span={24}>
+                    <Card hoverable style={{ borderRadius: "8px" }} title="Overview">
+                        <Row gutter={16}>
+                             <Col span={12}>
+                                <Statistic
+                                    title="Total Tasks"
+                                    value={totalCount}
+                                    prefix={<BarChartOutlined style={{ color: "#1890ff" }} />}
+                                />
+                             </Col>
+                             <Col span={12}>
+                                <Statistic
+                                    title="Pending"
+                                    value={pendingCount}
+                                    prefix={<ClockCircleOutlined style={{ color: "#faad14" }} />}
+                                />
+                             </Col>
+                        </Row>
+                        <div style={{ marginTop: 24 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                                <Text>Task Completion</Text>
+                                <Text>{completedCount} / {totalCount}</Text>
+                            </div>
+                            <Progress percent={completionRate} status="active" strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} />
+                        </div>
+                    </Card>
+                </Col>
+                <Col span={24}>
+                    <Card hoverable style={{ borderRadius: "8px" }} title="Quick Actions">
+                       <Button block icon={<PlusOutlined />} style={{ marginBottom: 12, textAlign: "left" }}>
+                           Log Activity
+                       </Button>
+                       <Button block icon={<ArrowRightOutlined />} style={{ textAlign: "left" }} onClick={() => navigate('/admin/activities')}>
+                           View All Activities
+                       </Button>
+                    </Card>
+                </Col>
+            </Row>
         </Col>
-        <Col xs={24} sm={8}>
+
+        {/* Right Column: Timeline */}
+        <Col xs={24} lg={16}>
           <Card
-            hoverable
+            title="Recent Activity Timeline"
             style={{ borderRadius: "8px", height: "100%" }}
-            bodyStyle={{ padding: "24px" }}
+            headStyle={{ borderBottom: "1px solid #f0f0f0" }}
           >
-            <Statistic
-              title="Completed"
-              value={completedCount}
-              prefix={<CheckCircleOutlined style={{ color: "#52c41a", backgroundColor: "#f6ffed", padding: 8, borderRadius: "50%" }} />}
-              valueStyle={{ fontWeight: 600 }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={8}>
-          <Card
-            hoverable
-            style={{ borderRadius: "8px", height: "100%" }}
-            bodyStyle={{ padding: "24px" }}
-          >
-            <Statistic
-              title="Pending"
-              value={pendingCount}
-              prefix={<ClockCircleOutlined style={{ color: "#faad14", backgroundColor: "#fffbe6", padding: 8, borderRadius: "50%" }} />}
-              valueStyle={{ fontWeight: 600 }}
-            />
+            {activities.length === 0 ? (
+              <Empty description="No activities found. Start working!" />
+            ) : (
+                <Timeline
+                    mode="left"
+                    items={activities.map((item: any) => ({
+                        color: item.status === 'completed' ? 'green' : 'blue',
+                        label: new Date(item.timestamp).toLocaleDateString(),
+                        children: (
+                            <>
+                                <Text strong>{item.type}</Text>
+                                <br/>
+                                <Text type="secondary" style={{ fontSize: 12 }}>
+                                    {new Date(item.timestamp).toLocaleTimeString()}
+                                </Text>
+                                {item.metadata && (
+                                    <div style={{ marginTop: 4, background: "#f5f5f5", padding: "4px 8px", borderRadius: 4, fontSize: 12 }}>
+                                        {typeof item.metadata === 'string' ? JSON.parse(item.metadata).note : item.metadata.note}
+                                    </div>
+                                )}
+                            </>
+                        )
+                    }))}
+                />
+            )}
           </Card>
         </Col>
       </Row>
-
-      <Card
-        title="Your Recent Activities"
-        style={{ borderRadius: "8px" }}
-        headStyle={{ borderBottom: "1px solid #f0f0f0" }}
-      >
-        {activities.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "32px 0" }}>
-            <Text type="secondary">No activities found. Start by logging your first task!</Text>
-          </div>
-        ) : (
-          <List
-            itemLayout="horizontal"
-            dataSource={activities}
-            renderItem={(item: any) => (
-              <List.Item>
-                <List.Item.Meta
-                  avatar={
-                    <Avatar
-                      icon={<UserOutlined />}
-                      style={{ backgroundColor: "#f0f2f5", color: "#1890ff" }}
-                    />
-                  }
-                  title={
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <Text strong>{item.type}</Text>
-                      <Tag
-                        color={
-                          item.status === "completed"
-                            ? "success"
-                            : item.status === "pending"
-                            ? "warning"
-                            : "default"
-                        }
-                        bordered={false}
-                      >
-                        {item.status}
-                      </Tag>
-                    </div>
-                  }
-                  description={
-                    <div>
-                      <Text type="secondary">
-                        {new Date(item.timestamp).toLocaleString()}
-                      </Text>
-                      {item.metadata && (
-                        <div style={{ marginTop: "4px" }}>
-                          <Text style={{ fontSize: "12px", color: "#8c8c8c" }}>
-                             Note: {typeof item.metadata === 'string' ? JSON.parse(item.metadata).note : item.metadata.note}
-                          </Text>
-                        </div>
-                      )}
-                    </div>
-                  }
-                />
-              </List.Item>
-            )}
-          />
-        )}
-      </Card>
     </div>
   );
 }
