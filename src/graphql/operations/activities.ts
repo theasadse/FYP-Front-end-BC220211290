@@ -146,3 +146,24 @@ export const DELETE_ACTIVITY = gql`
     deleteActivity(id: $deleteActivityId)
   }
 `;
+
+/**
+ * Subscription to listen for new activities.
+ *
+ * @returns {object} The newly created activity.
+ */
+export const ACTIVITY_ADDED = gql`
+  subscription ActivityAdded {
+    activityAdded {
+      id
+      user {
+        id
+        name
+      }
+      type
+      timestamp
+      status
+      metadata
+    }
+  }
+`;

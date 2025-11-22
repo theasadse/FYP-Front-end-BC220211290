@@ -9,7 +9,11 @@ import {
   Popconfirm,
   message,
   Tag,
+  Typography,
+  Space,
+  Avatar
 } from "antd";
+import { PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined, MailOutlined, LockOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
 import { useQuery, useMutation } from "@apollo/client";
 import {
   USERS,
@@ -18,6 +22,8 @@ import {
   DELETE_USER,
 } from "../graphql/operations/users";
 import { ROLES } from "../graphql/operations/roles";
+
+const { Title, Text } = Typography;
 
 /**
  * Users Page component.
@@ -129,10 +135,18 @@ export default function UsersPage() {
       title: "ID",
       dataIndex: "id",
       width: 80,
+      sorter: (a: any, b: any) => a.id.localeCompare(b.id),
     },
     {
       title: "Name",
       dataIndex: "name",
+      render: (name: string) => (
+        <Space>
+           <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#1890ff' }} size="small" />
+           {name}
+        </Space>
+      ),
+      sorter: (a: any, b: any) => a.name.localeCompare(b.name),
     },
     {
       title: "Email",
@@ -141,47 +155,54 @@ export default function UsersPage() {
     {
       title: "Role",
       dataIndex: ["role", "name"],
-      render: (role: string) => <Tag color="blue">{role || "N/A"}</Tag>,
+      render: (role: string) => {
+        let color = 'default';
+        if (role === 'admin') color = 'magenta';
+        if (role === 'user') color = 'green';
+        if (role === 'viewer') color = 'blue';
+        return <Tag color={color}>{role ? role.toUpperCase() : "N/A"}</Tag>;
+      },
+      filters: roles.map(r => ({ text: r.name, value: r.name })),
+      onFilter: (value: any, record: any) => record.role?.name === value,
     },
     {
       title: "Actions",
-      width: 180,
+      width: 150,
       render: (_: any, record: any) => (
-        <>
-          <Button type="link" onClick={() => onEdit(record)}>
-            Edit
-          </Button>
+        <Space>
+          <Button type="text" icon={<EditOutlined />} onClick={() => onEdit(record)} />
           <Popconfirm
             title="Delete user?"
+            description="This action cannot be undone."
             onConfirm={() => onDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
           >
-            <Button type="link" danger>
-              Delete
-            </Button>
+            <Button type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
-        </>
+        </Space>
       ),
     },
   ];
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div>
       {contextHolder}
       <div
         style={{
-          marginBottom: "16px",
+          marginBottom: "24px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
         }}
       >
         <div>
-          <h2 style={{ margin: 0 }}>Manage Users</h2>
-          <p style={{ color: "#8c8c8c", margin: "4px 0 0 0" }}>
+          <Title level={2} style={{ margin: 0 }}>Manage Users</Title>
+          <Text type="secondary">
             Create, update, and manage user accounts
-          </p>
+          </Text>
         </div>
-        <Button type="primary" onClick={onAdd} size="large">
+        <Button type="primary" icon={<PlusOutlined />} onClick={onAdd} size="large">
           New User
         </Button>
       </div>
@@ -195,39 +216,41 @@ export default function UsersPage() {
           showSizeChanger: true,
           showTotal: (total) => `Total ${total} users`,
         }}
-        style={{ backgroundColor: "#fff", borderRadius: "8px" }}
+        style={{ backgroundColor: "#fff", borderRadius: "8px", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)" }}
       />
 
       <Modal
-        title={editing ? "Edit User" : "New User"}
+        title={editing ? "Edit User" : "Create New User"}
         open={visible}
         onOk={onOk}
         onCancel={() => setVisible(false)}
         confirmLoading={isSaving}
+        okText={editing ? "Update" : "Create"}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="name" label="Full Name" rules={[{ required: true }]}>
-            <Input placeholder="Enter full name" />
+          <Form.Item name="name" label="Full Name" rules={[{ required: true, message: "Please enter full name" }]}>
+            <Input prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="John Doe" />
           </Form.Item>
           <Form.Item
             name="email"
             label="Email"
-            rules={[{ required: true, type: "email" }]}
+            rules={[{ required: true, type: "email", message: "Please enter a valid email" }]}
           >
-            <Input placeholder="Enter email address" />
+            <Input prefix={<MailOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="john@example.com" />
           </Form.Item>
           {!editing && (
             <Form.Item
               name="password"
               label="Password"
-              rules={[{ required: true, min: 6 }]}
+              rules={[{ required: true, min: 6, message: "Password must be at least 6 characters" }]}
             >
-              <Input.Password placeholder="Enter password (min 6 characters)" />
+              <Input.Password prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="Min 6 characters" />
             </Form.Item>
           )}
-          <Form.Item name="roleName" label="Role" rules={[{ required: true }]}>
+          <Form.Item name="roleName" label="Role" rules={[{ required: true, message: "Please select a role" }]}>
             <Select
               placeholder="Select a role"
+              suffixIcon={<SafetyCertificateOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
               options={roles.map((r) => ({ label: r.name, value: r.name }))}
             />
           </Form.Item>

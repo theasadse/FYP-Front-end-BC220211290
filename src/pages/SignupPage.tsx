@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Select, message, Card, Typography } from "antd";
+import { Form, Input, Button, Select, message, Card, Typography, Layout, Space } from "antd";
 import { useMutation, useQuery } from "@apollo/client";
 import { REGISTER } from "../graphql/operations/auth";
 import { ROLES } from "../graphql/operations/roles";
-import { useNavigate } from "react-router-dom";
-import { LeftOutlined } from "@ant-design/icons";
+import { useNavigate, Link } from "react-router-dom";
+import { LeftOutlined, UserOutlined, MailOutlined, LockOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
+const { Content } = Layout;
 
 /**
  * Signup Page component.
@@ -24,7 +27,6 @@ export default function SignupPage() {
 
   const { data: rolesData } = useQuery(ROLES);
 
-  console.log(rolesData);
   useEffect(() => {
     if (rolesData) setRoles(rolesData.roles);
   }, [rolesData]);
@@ -65,63 +67,76 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="form-center">
-      {contextHolder}
-      <Card style={{ width: 460, borderRadius: 14 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            marginBottom: 8,
-            gap: 12,
-          }}
+    <Layout style={{ minHeight: "100vh", background: "#f0f2f5" }}>
+      <Content
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "20px",
+        }}
+      >
+        {contextHolder}
+        <Card
+          style={{ width: 480, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", borderRadius: "8px" }}
+          bodyStyle={{ padding: "32px 32px" }}
         >
-          <Button
-            type="text"
-            className="back-button"
-            icon={<LeftOutlined />}
-            onClick={() => navigate("/login")}
-          />
-          <div>
-            <Typography.Title level={4} style={{ margin: 0 }}>
-              Create Account
-            </Typography.Title>
-            <div style={{ color: "var(--muted, #5f6f88)", fontSize: 13 }}>
-              Create a new user account
-            </div>
-          </div>
-        </div>
-
-        <Form layout="vertical" onFinish={onFinish}>
-          <Form.Item
-            name="username"
-            label="Username"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item name="name" label="Full name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            label="Password"
-            rules={[{ required: true, min: 6 }]}
-          >
-            <Input.Password />
-          </Form.Item>
-          <Form.Item name="role" label="Role" rules={[{ required: true }]}>
-            <Select
-              options={roles?.map((r) => ({ label: r.name, value: r.name }))}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" block loading={loading}>
-              Create account
+          <div style={{ marginBottom: "24px" }}>
+            <Button
+              type="text"
+              icon={<LeftOutlined />}
+              onClick={() => navigate("/login")}
+              style={{ paddingLeft: 0, marginBottom: 8 }}
+            >
+              Back to Login
             </Button>
-          </Form.Item>
-        </Form>
-      </Card>
-    </div>
+            <Title level={3} style={{ margin: 0, color: "#1890ff" }}>
+              Create Account
+            </Title>
+            <Text type="secondary">Join the FYP Admin Panel today.</Text>
+          </div>
+
+          <Form layout="vertical" onFinish={onFinish} size="large">
+            <Form.Item
+              name="name"
+              label="Full Name"
+              rules={[{ required: true, message: "Please enter your full name" }]}
+            >
+              <Input prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="John Doe" />
+            </Form.Item>
+
+            <Form.Item
+              name="username"
+              label="Username"
+              rules={[{ required: true, message: "Please enter a username" }]}
+            >
+              <Input prefix={<MailOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="johndoe" />
+            </Form.Item>
+
+            <Form.Item
+              name="password"
+              label="Password"
+              rules={[{ required: true, min: 6, message: "Password must be at least 6 characters" }]}
+            >
+              <Input.Password prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="Password" />
+            </Form.Item>
+
+            <Form.Item name="role" label="Role" rules={[{ required: true, message: "Please select a role" }]}>
+              <Select
+                placeholder="Select a role"
+                suffixIcon={<SafetyCertificateOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+                options={roles?.map((r) => ({ label: r.name, value: r.name }))}
+              />
+            </Form.Item>
+
+            <Form.Item style={{ marginTop: 24 }}>
+              <Button type="primary" htmlType="submit" block loading={loading}>
+                Create Account
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      </Content>
+    </Layout>
   );
 }

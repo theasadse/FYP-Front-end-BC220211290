@@ -11,7 +11,12 @@ import {
   Popconfirm,
   message,
   Tag,
+  Typography,
+  Space,
+  Avatar,
+  Badge
 } from "antd";
+import { DownloadOutlined, PlusOutlined, EditOutlined, DeleteOutlined, FileTextOutlined, UserOutlined } from "@ant-design/icons";
 import { useQuery, useMutation } from "@apollo/client";
 import { ACTIVITIES } from "../graphql/operations/activities";
 import {
@@ -20,6 +25,8 @@ import {
   UPDATE_REPORT,
   DELETE_REPORT,
 } from "../graphql/operations/reports";
+
+const { Title, Text } = Typography;
 
 /**
  * Reports Page component.
@@ -166,70 +173,80 @@ export default function ReportsPage() {
 
   const reportColumns = [
     { title: "ID", dataIndex: "id", width: 80 },
-    { title: "User", dataIndex: ["user", "name"] },
+    {
+      title: "User",
+      dataIndex: ["user", "name"],
+      render: (name: string) => name || <Text type="secondary">N/A</Text>
+    },
     {
       title: "Type",
       dataIndex: "type",
-      render: (type: string) => <Tag color="blue">{type}</Tag>,
+      render: (type: string) => <Tag color="blue">{type.toUpperCase()}</Tag>,
+      filters: [
+        { text: 'Weekly', value: 'weekly' },
+        { text: 'Monthly', value: 'monthly' },
+        { text: 'Quarterly', value: 'quarterly' },
+        { text: 'Annual', value: 'annual' },
+      ],
+      onFilter: (value: any, record: any) => record.type === value,
     },
     {
       title: "Start Date",
       dataIndex: "start_date",
       render: (date: string) =>
-        date ? new Date(date).toLocaleDateString() : "N/A",
+        date ? new Date(date).toLocaleDateString() : <Text type="secondary">N/A</Text>,
     },
     {
       title: "End Date",
       dataIndex: "end_date",
       render: (date: string) =>
-        date ? new Date(date).toLocaleDateString() : "N/A",
+        date ? new Date(date).toLocaleDateString() : <Text type="secondary">N/A</Text>,
     },
     {
       title: "Actions",
-      width: 180,
+      width: 150,
       render: (_: any, record: any) => (
-        <>
-          <Button type="link" onClick={() => onEdit(record)}>
-            Edit
-          </Button>
+        <Space>
+          <Button type="text" icon={<EditOutlined />} onClick={() => onEdit(record)} />
           <Popconfirm
             title="Delete report?"
+            description="This action cannot be undone."
             onConfirm={() => onDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
           >
-            <Button type="link" danger>
-              Delete
-            </Button>
+            <Button type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
-        </>
+        </Space>
       ),
     },
   ];
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div>
       {contextHolder}
       <div
         style={{
-          marginBottom: "16px",
+          marginBottom: "24px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
         }}
       >
         <div>
-          <h2 style={{ margin: 0 }}>Reports</h2>
-          <p style={{ color: "#8c8c8c", margin: "4px 0 0 0" }}>
+          <Title level={2} style={{ margin: 0 }}>Reports</Title>
+          <Text type="secondary">
             Generate and manage activity reports
-          </p>
+          </Text>
         </div>
-        <div>
-          <Button onClick={onExport} style={{ marginRight: 8 }}>
-            Export Activities (JSON)
+        <Space>
+          <Button icon={<DownloadOutlined />} onClick={onExport}>
+            Export JSON
           </Button>
-          <Button type="primary" onClick={onAdd} size="large">
+          <Button type="primary" icon={<PlusOutlined />} onClick={onAdd} size="large">
             Create Report
           </Button>
-        </div>
+        </Space>
       </div>
 
       <Table
@@ -241,6 +258,7 @@ export default function ReportsPage() {
           marginBottom: 24,
           backgroundColor: "#fff",
           borderRadius: "8px",
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)"
         }}
         pagination={{
           pageSize: 10,
@@ -252,46 +270,37 @@ export default function ReportsPage() {
       <Card
         title="Recent Activities"
         style={{ borderRadius: "8px" }}
-        headStyle={{ backgroundColor: "#fafafa", fontWeight: 600 }}
+        headStyle={{ borderBottom: "1px solid #f0f0f0" }}
       >
         {activities.length === 0 ? (
-          <p style={{ color: "#8c8c8c" }}>No recent activities</p>
+          <div style={{ textAlign: "center", padding: "24px" }}>
+            <Text type="secondary">No recent activities found</Text>
+          </div>
         ) : (
           <List
+            itemLayout="horizontal"
             dataSource={activities.slice(0, 10)}
             renderItem={(item: any) => (
               <List.Item>
                 <List.Item.Meta
+                  avatar={<Avatar icon={<UserOutlined />} style={{ backgroundColor: "#f0f2f5", color: "#1890ff" }} />}
                   title={
-                    <div>
-                      {item.type}
-                      {item.status && (
-                        <Tag
-                          color={
-                            item.status === "completed"
-                              ? "success"
-                              : item.status === "pending"
-                              ? "warning"
-                              : "default"
-                          }
-                          style={{ marginLeft: "8px" }}
-                        >
-                          {item.status}
-                        </Tag>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                       <Text strong>{item.type}</Text>
+                       {item.status && (
+                        <Badge status={item.status === "completed" ? "success" : "processing"} text={item.status} />
                       )}
                     </div>
                   }
                   description={
                     <div>
-                      <span style={{ color: "#8c8c8c" }}>
+                      <Text type="secondary" style={{ fontSize: 12 }}>
                         {item.timestamp
                           ? new Date(item.timestamp).toLocaleString()
                           : "N/A"}
-                      </span>
+                      </Text>
                       {item.user?.name && (
-                        <span style={{ marginLeft: "12px", color: "#1890ff" }}>
-                          User: {item.user.name}
-                        </span>
+                         <Text type="secondary" style={{ marginLeft: 8 }}>by {item.user.name}</Text>
                       )}
                     </div>
                   }
@@ -303,33 +312,34 @@ export default function ReportsPage() {
       </Card>
 
       <Modal
-        title={editing ? "Edit Report" : "Create Report"}
+        title={editing ? "Edit Report" : "Generate New Report"}
         open={visible}
         onOk={onOk}
         onCancel={() => setVisible(false)}
         confirmLoading={isSaving}
+        okText={editing ? "Update" : "Generate"}
       >
         <Form form={form} layout="vertical">
           {!editing && (
             <Form.Item
               name="userId"
               label="User ID"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: "Please enter a User ID" }]}
             >
-              <Input type="number" />
+              <Input type="number" placeholder="Enter User ID" />
             </Form.Item>
           )}
           <Form.Item
             name="type"
             label="Report Type"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Please select a report type" }]}
           >
             <Select
               options={[
-                { label: "Weekly", value: "weekly" },
-                { label: "Monthly", value: "monthly" },
-                { label: "Quarterly", value: "quarterly" },
-                { label: "Annual", value: "annual" },
+                { label: "Weekly Report", value: "weekly" },
+                { label: "Monthly Report", value: "monthly" },
+                { label: "Quarterly Report", value: "quarterly" },
+                { label: "Annual Report", value: "annual" },
               ]}
             />
           </Form.Item>
