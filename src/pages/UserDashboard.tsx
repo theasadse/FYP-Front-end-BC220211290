@@ -9,11 +9,13 @@ import {
   Spin,
   Typography,
   Statistic,
+  Badge,
 } from "antd";
 import {
   UserOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@apollo/client";
 import { ME } from "../graphql/operations/auth";
@@ -68,60 +70,85 @@ export default function UserDashboard() {
   ).length;
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div>
+       <div style={{ marginBottom: "24px" }}>
+        <Title level={2} style={{ marginBottom: "8px" }}>User Dashboard</Title>
+        <Text type="secondary">
+          Track your progress and manage your daily tasks.
+        </Text>
+      </div>
+
       <Card
         style={{
           marginBottom: "24px",
           borderRadius: "8px",
           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          border: "none",
         }}
         bodyStyle={{ padding: "32px" }}
       >
-        <Row align="middle" gutter={16}>
+        <Row align="middle" gutter={24}>
           <Col>
             <Avatar
-              size={64}
+              size={80}
               icon={<UserOutlined />}
-              style={{ backgroundColor: "#fff", color: "#667eea" }}
+              style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", border: "2px solid rgba(255,255,255,0.4)" }}
             />
           </Col>
           <Col flex="auto">
-            <Title level={3} style={{ color: "#fff", margin: 0 }}>
+            <Title level={3} style={{ color: "#fff", margin: 0, fontWeight: 600 }}>
               Welcome back, {user?.name || "User"}!
             </Title>
-            <Text style={{ color: "rgba(255,255,255,0.85)", fontSize: "16px" }}>
-              {user?.email} • {user?.role?.name || "User"}
-            </Text>
+            <div style={{ marginTop: 8 }}>
+              <Tag color="rgba(0,0,0,0.2)" style={{ color: "white", border: "none" }}>{user?.role?.name?.toUpperCase() || "USER"}</Tag>
+              <Text style={{ color: "rgba(255,255,255,0.85)", fontSize: "14px", marginLeft: 8 }}>
+                {user?.email}
+              </Text>
+            </div>
           </Col>
         </Row>
       </Card>
 
-      <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
-        <Col xs={24} sm={12}>
+      <Row gutter={[24, 24]} style={{ marginBottom: "24px" }}>
+        <Col xs={24} sm={8}>
           <Card
             hoverable
-            style={{ borderRadius: "8px" }}
+            style={{ borderRadius: "8px", height: "100%" }}
             bodyStyle={{ padding: "24px" }}
           >
             <Statistic
-              title="Completed Activities"
-              value={completedCount}
-              prefix={<CheckCircleOutlined style={{ color: "#52c41a" }} />}
-              valueStyle={{ color: "#52c41a" }}
+              title="Total Tasks"
+              value={activities.length}
+              prefix={<BarChartOutlined style={{ color: "#1890ff", backgroundColor: "#e6f7ff", padding: 8, borderRadius: "50%" }} />}
+              valueStyle={{ fontWeight: 600 }}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12}>
+        <Col xs={24} sm={8}>
           <Card
             hoverable
-            style={{ borderRadius: "8px" }}
+            style={{ borderRadius: "8px", height: "100%" }}
             bodyStyle={{ padding: "24px" }}
           >
             <Statistic
-              title="Pending Activities"
+              title="Completed"
+              value={completedCount}
+              prefix={<CheckCircleOutlined style={{ color: "#52c41a", backgroundColor: "#f6ffed", padding: 8, borderRadius: "50%" }} />}
+              valueStyle={{ fontWeight: 600 }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={8}>
+          <Card
+            hoverable
+            style={{ borderRadius: "8px", height: "100%" }}
+            bodyStyle={{ padding: "24px" }}
+          >
+            <Statistic
+              title="Pending"
               value={pendingCount}
-              prefix={<ClockCircleOutlined style={{ color: "#faad14" }} />}
-              valueStyle={{ color: "#faad14" }}
+              prefix={<ClockCircleOutlined style={{ color: "#faad14", backgroundColor: "#fffbe6", padding: 8, borderRadius: "50%" }} />}
+              valueStyle={{ fontWeight: 600 }}
             />
           </Card>
         </Col>
@@ -130,10 +157,12 @@ export default function UserDashboard() {
       <Card
         title="Your Recent Activities"
         style={{ borderRadius: "8px" }}
-        headStyle={{ backgroundColor: "#fafafa", fontWeight: 600 }}
+        headStyle={{ borderBottom: "1px solid #f0f0f0" }}
       >
         {activities.length === 0 ? (
-          <Text type="secondary">No activities found</Text>
+          <div style={{ textAlign: "center", padding: "32px 0" }}>
+            <Text type="secondary">No activities found. Start by logging your first task!</Text>
+          </div>
         ) : (
           <List
             itemLayout="horizontal"
@@ -144,12 +173,12 @@ export default function UserDashboard() {
                   avatar={
                     <Avatar
                       icon={<UserOutlined />}
-                      style={{ backgroundColor: "#1890ff" }}
+                      style={{ backgroundColor: "#f0f2f5", color: "#1890ff" }}
                     />
                   }
                   title={
-                    <div>
-                      {item.type}
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <Text strong>{item.type}</Text>
                       <Tag
                         color={
                           item.status === "completed"
@@ -158,7 +187,7 @@ export default function UserDashboard() {
                             ? "warning"
                             : "default"
                         }
-                        style={{ marginLeft: "8px" }}
+                        bordered={false}
                       >
                         {item.status}
                       </Tag>
@@ -171,8 +200,8 @@ export default function UserDashboard() {
                       </Text>
                       {item.metadata && (
                         <div style={{ marginTop: "4px" }}>
-                          <Text style={{ fontSize: "12px" }}>
-                            {item.metadata}
+                          <Text style={{ fontSize: "12px", color: "#8c8c8c" }}>
+                             Note: {typeof item.metadata === 'string' ? JSON.parse(item.metadata).note : item.metadata.note}
                           </Text>
                         </div>
                       )}

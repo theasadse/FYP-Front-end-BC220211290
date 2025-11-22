@@ -9,7 +9,10 @@ import {
   Popconfirm,
   message,
   Tag,
+  Typography,
+  Space
 } from "antd";
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons";
 import { useQuery, useMutation } from "@apollo/client";
 import {
   ACTIVITIES,
@@ -17,6 +20,8 @@ import {
   UPDATE_ACTIVITY,
   DELETE_ACTIVITY,
 } from "../graphql/operations/activities";
+
+const { Title, Text } = Typography;
 
 /**
  * Page component for managing Activities.
@@ -129,15 +134,23 @@ export default function ActivitiesPage() {
       title: "ID",
       dataIndex: "id",
       width: 80,
+      sorter: (a: any, b: any) => a.id - b.id,
     },
     {
       title: "User",
       dataIndex: ["user", "name"],
-      render: (name: string) => name || "N/A",
+      render: (name: string) => name || <Text type="secondary">N/A</Text>,
+      sorter: (a: any, b: any) => (a.user?.name || "").localeCompare(b.user?.name || ""),
     },
     {
       title: "Activity Type",
       dataIndex: "type",
+      filters: [
+        { text: 'MDB Reply', value: 'MDB Reply' },
+        { text: 'Assignment Upload', value: 'Assignment Upload' },
+        { text: 'Ticket Response', value: 'Ticket Response' },
+      ],
+      onFilter: (value: any, record: any) => record.type.indexOf(value) === 0,
     },
     {
       title: "Status",
@@ -152,7 +165,7 @@ export default function ActivitiesPage() {
               : "default"
           }
         >
-          {status || "N/A"}
+          {status ? status.toUpperCase() : "N/A"}
         </Tag>
       ),
     },
@@ -160,50 +173,52 @@ export default function ActivitiesPage() {
       title: "Timestamp",
       dataIndex: "timestamp",
       render: (timestamp: string) =>
-        timestamp ? new Date(timestamp).toLocaleString() : "N/A",
+        timestamp ? new Date(timestamp).toLocaleString() : <Text type="secondary">N/A</Text>,
+      sorter: (a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      defaultSortOrder: 'descend' as const,
     },
     {
       title: "Actions",
-      width: 180,
+      width: 150,
       render: (_: any, record: any) => (
-        <>
-          <Button type="link" onClick={() => onEdit(record)}>
-            Edit
-          </Button>
+        <Space>
+          <Button type="text" icon={<EditOutlined />} onClick={() => onEdit(record)} />
           <Popconfirm
             title="Delete activity?"
+            description="This action cannot be undone."
             onConfirm={() => onDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
           >
-            <Button type="link" danger>
-              Delete
-            </Button>
+            <Button type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
-        </>
+        </Space>
       ),
     },
   ];
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div>
       {contextHolder}
       <div
         style={{
-          marginBottom: "16px",
+          marginBottom: "24px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
         }}
       >
         <div>
-          <h2 style={{ margin: 0 }}>Activity Logs</h2>
-          <p style={{ color: "#8c8c8c", margin: "4px 0 0 0" }}>
+          <Title level={2} style={{ margin: 0 }}>Activity Logs</Title>
+          <Text type="secondary">
             Monitor and manage system activities
-          </p>
+          </Text>
         </div>
-        <Button type="primary" onClick={onAdd} size="large">
-          Log New Activity
+        <Button type="primary" icon={<PlusOutlined />} onClick={onAdd} size="large">
+          Log Activity
         </Button>
       </div>
+
       <Table
         rowKey="id"
         dataSource={data}
@@ -212,17 +227,22 @@ export default function ActivitiesPage() {
         pagination={{
           pageSize: 10,
           showSizeChanger: true,
-          showTotal: (total) => `Total ${total} activities`,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
         }}
-        style={{ backgroundColor: "#fff", borderRadius: "8px" }}
+        style={{
+          backgroundColor: "#fff",
+          borderRadius: "8px",
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02)"
+        }}
       />
 
       <Modal
-        title={editing ? "Edit Activity" : "Log Activity"}
+        title={editing ? "Edit Activity" : "Log New Activity"}
         open={visible}
         onOk={onOk}
         onCancel={() => setVisible(false)}
         confirmLoading={isSaving}
+        okText={editing ? "Update" : "Create"}
       >
         <Form
           form={form}
@@ -232,14 +252,14 @@ export default function ActivitiesPage() {
           <Form.Item
             name="instructor_id"
             label="Instructor ID"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Please enter the instructor ID" }]}
           >
-            <Input />
+            <Input placeholder="e.g., 101" />
           </Form.Item>
           <Form.Item
             name="activity"
-            label="Activity"
-            rules={[{ required: true }]}
+            label="Activity Type"
+            rules={[{ required: true, message: "Please select an activity type" }]}
           >
             <Select
               options={[
@@ -249,8 +269,8 @@ export default function ActivitiesPage() {
               ]}
             />
           </Form.Item>
-          <Form.Item name="metadata.note" label="Note">
-            <Input />
+          <Form.Item name="metadata.note" label="Additional Note">
+            <Input.TextArea rows={3} placeholder="Add any relevant details..." />
           </Form.Item>
         </Form>
       </Modal>

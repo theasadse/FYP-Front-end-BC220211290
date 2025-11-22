@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Modal, Form, Input, Popconfirm, message } from "antd";
+import { Table, Button, Modal, Form, Input, Popconfirm, message, Typography, Space, Tag } from "antd";
+import { PlusOutlined, EditOutlined, DeleteOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
 import { useQuery, useMutation } from "@apollo/client";
 import {
   ROLES,
@@ -7,6 +8,8 @@ import {
   UPDATE_ROLE,
   DELETE_ROLE,
 } from "../graphql/operations/roles";
+
+const { Title, Text } = Typography;
 
 /**
  * Roles Page component.
@@ -107,47 +110,50 @@ export default function RolesPage() {
   const isSaving = createLoading || updateLoading;
 
   const columns = [
-    { title: "ID", dataIndex: "id", width: 80 },
-    { title: "Role Name", dataIndex: "name" },
+    { title: "ID", dataIndex: "id", width: 80, sorter: (a: any, b: any) => a.id.localeCompare(b.id) },
+    {
+      title: "Role Name",
+      dataIndex: "name",
+      render: (name: string) => <Tag icon={<SafetyCertificateOutlined />} color="geekblue">{name.toUpperCase()}</Tag>
+    },
     {
       title: "Actions",
-      width: 180,
+      width: 150,
       render: (_: any, record: any) => (
-        <>
-          <Button type="link" onClick={() => onEdit(record)}>
-            Edit
-          </Button>
+        <Space>
+          <Button type="text" icon={<EditOutlined />} onClick={() => onEdit(record)} />
           <Popconfirm
             title="Delete role?"
+            description="This action cannot be undone."
             onConfirm={() => onDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
           >
-            <Button type="link" danger>
-              Delete
-            </Button>
+            <Button type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
-        </>
+        </Space>
       ),
     },
   ];
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div>
       {contextHolder}
       <div
         style={{
-          marginBottom: "16px",
+          marginBottom: "24px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
         }}
       >
         <div>
-          <h2 style={{ margin: 0 }}>Manage Roles</h2>
-          <p style={{ color: "#8c8c8c", margin: "4px 0 0 0" }}>
-            Create, update, and manage user roles
-          </p>
+          <Title level={2} style={{ margin: 0 }}>Manage Roles</Title>
+          <Text type="secondary">
+            Define user access levels and permissions
+          </Text>
         </div>
-        <Button type="primary" onClick={onAdd} size="large">
+        <Button type="primary" icon={<PlusOutlined />} onClick={onAdd} size="large">
           New Role
         </Button>
       </div>
@@ -161,19 +167,24 @@ export default function RolesPage() {
           showSizeChanger: true,
           showTotal: (total) => `Total ${total} roles`,
         }}
-        style={{ backgroundColor: "#fff", borderRadius: "8px" }}
+        style={{ backgroundColor: "#fff", borderRadius: "8px", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)" }}
       />
 
       <Modal
-        title={editing ? "Edit Role" : "New Role"}
+        title={editing ? "Edit Role" : "Create New Role"}
         open={visible}
         onOk={onOk}
         onCancel={() => setVisible(false)}
         confirmLoading={isSaving}
+        okText={editing ? "Update" : "Create"}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="name" label="Role Name" rules={[{ required: true }]}>
-            <Input />
+          <Form.Item
+            name="name"
+            label="Role Name"
+            rules={[{ required: true, message: "Please enter a role name" }]}
+          >
+            <Input prefix={<SafetyCertificateOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="e.g., moderator" />
           </Form.Item>
         </Form>
       </Modal>
