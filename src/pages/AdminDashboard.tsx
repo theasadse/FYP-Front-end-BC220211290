@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
-import { Card, Row, Col, Statistic, Table, Spin, Typography, List, Tag, Badge, message } from "antd";
+import { Card, Row, Col, Statistic, Spin, Typography, Tag, message, Timeline, Progress, Skeleton } from "antd";
 import {
-  UserOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   BarChartOutlined,
   ArrowUpOutlined,
-  NotificationOutlined
+  NotificationOutlined,
+  SmileOutlined
 } from "@ant-design/icons";
 import { useQuery, useSubscription } from "@apollo/client";
 import { GET_DASHBOARD_STATS, ACTIVITIES, ACTIVITY_ADDED } from "../graphql/operations/activities";
@@ -50,18 +50,19 @@ export default function AdminDashboard() {
 
   const stats = data?.getDashboardStats;
   const recentActivities = activitiesData?.activities || [];
+  const isLoading = loading || activitiesLoading;
 
-  if (loading || activitiesLoading) {
+  if (isLoading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "400px",
-        }}
-      >
-        <Spin size="large" tip="Loading dashboard statistics..." />
+      <div style={{ padding: "24px" }}>
+        <Row gutter={[24, 24]}>
+            <Col xs={24} lg={8}><Skeleton active paragraph={{ rows: 3 }} /></Col>
+            <Col xs={24} lg={8}><Skeleton active paragraph={{ rows: 3 }} /></Col>
+            <Col xs={24} lg={8}><Skeleton active paragraph={{ rows: 3 }} /></Col>
+        </Row>
+        <div style={{ marginTop: 24 }}>
+             <Skeleton active paragraph={{ rows: 6 }} />
+        </div>
       </div>
     );
   }
@@ -79,34 +80,13 @@ export default function AdminDashboard() {
     );
   }
 
-  const typeColumns = [
-    { title: "Activity Type", dataIndex: "type", key: "type" },
-    {
-      title: "Count",
-      dataIndex: "count",
-      key: "count",
-      align: "right" as const,
-      render: (count: number) => <Tag color="blue">{count}</Tag>,
-    },
-    {
-      title: "Percentage",
-      key: "percentage",
-      align: "right" as const,
-      render: (_: any, record: any) => {
-        const total = stats?.totalActivities || 1;
-        const percent = ((record.count / total) * 100).toFixed(1);
-        return <Text type="secondary">{percent}%</Text>;
-      }
-    }
-  ];
-
   return (
     <div>
       {contextHolder}
       <div style={{ marginBottom: "24px" }}>
-        <Title level={2} style={{ marginBottom: "8px" }}>Admin Dashboard</Title>
+        <Title level={2} style={{ marginBottom: "8px", margin: 0 }}>Admin Dashboard</Title>
         <Text type="secondary">
-          Welcome back. Here is an overview of the system status.
+          Overview of system performance and recent events.
         </Text>
       </div>
 
@@ -123,10 +103,11 @@ export default function AdminDashboard() {
               prefix={<BarChartOutlined style={{ color: "#1890ff", backgroundColor: "#e6f7ff", padding: 8, borderRadius: "50%" }} />}
               valueStyle={{ fontWeight: 600 }}
             />
-            <div style={{ marginTop: 8 }}>
+            <div style={{ marginTop: 12 }}>
               <Text type="success"><ArrowUpOutlined /> 12% </Text>
               <Text type="secondary">vs last week</Text>
             </div>
+            <Progress percent={70} showInfo={false} strokeColor="#1890ff" size="small" style={{ marginTop: 12 }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={8}>
@@ -141,10 +122,11 @@ export default function AdminDashboard() {
               prefix={<CheckCircleOutlined style={{ color: "#52c41a", backgroundColor: "#f6ffed", padding: 8, borderRadius: "50%" }} />}
               valueStyle={{ fontWeight: 600 }}
             />
-             <div style={{ marginTop: 8 }}>
+             <div style={{ marginTop: 12 }}>
               <Text type="success"><ArrowUpOutlined /> 5% </Text>
               <Text type="secondary">completion rate</Text>
             </div>
+            <Progress percent={85} showInfo={false} strokeColor="#52c41a" size="small" style={{ marginTop: 12 }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={8}>
@@ -159,9 +141,10 @@ export default function AdminDashboard() {
               prefix={<ClockCircleOutlined style={{ color: "#faad14", backgroundColor: "#fffbe6", padding: 8, borderRadius: "50%" }} />}
               valueStyle={{ fontWeight: 600 }}
             />
-             <div style={{ marginTop: 8 }}>
+             <div style={{ marginTop: 12 }}>
               <Text type="warning">Requires attention</Text>
             </div>
+             <Progress percent={30} showInfo={false} strokeColor="#faad14" size="small" style={{ marginTop: 12 }} />
           </Card>
         </Col>
       </Row>
@@ -170,53 +153,51 @@ export default function AdminDashboard() {
         <Col xs={24} lg={14}>
           <Card
             title="Recent Activity Feed"
-            extra={<Tag color="processing">Live Updates</Tag>}
+            extra={<Tag color="processing" icon={<NotificationOutlined />}>Live</Tag>}
             style={{ borderRadius: "8px", height: "100%" }}
-            headStyle={{ borderBottom: "1px solid #f0f0f0" }}
           >
-            <List
-              itemLayout="horizontal"
-              dataSource={recentActivities}
-              renderItem={(item: any) => (
-                <List.Item>
-                  <List.Item.Meta
-                    avatar={<UserOutlined style={{ fontSize: 24, color: "#1890ff", background: "#f0f2f5", padding: 8, borderRadius: "50%" }} />}
-                    title={
-                      <div style={{ display: "flex", justifyContent: "space-between" }}>
-                        <Text strong>{item.type}</Text>
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          {item.timestamp ? new Date(item.timestamp).toLocaleString() : "N/A"}
-                        </Text>
-                      </div>
-                    }
-                    description={
-                      <div>
-                         <Text>by {item.user?.name || "Unknown User"}</Text>
-                         <div style={{ marginTop: 4 }}>
-                           <Badge status={item.status === "completed" ? "success" : "processing"} text={item.status} />
-                         </div>
-                      </div>
-                    }
-                  />
-                </List.Item>
-              )}
+            <Timeline
+                mode="left"
+                items={recentActivities.map((item: any) => ({
+                    color: item.status === 'completed' ? 'green' : 'blue',
+                    dot: item.status === 'completed' ? <CheckCircleOutlined /> : <ClockCircleOutlined />,
+                    children: (
+                        <>
+                            <Text strong>{item.type}</Text> <Text type="secondary">by {item.user?.name}</Text>
+                            <br/>
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                                {new Date(item.timestamp).toLocaleString()}
+                            </Text>
+                        </>
+                    )
+                }))}
             />
           </Card>
         </Col>
         <Col xs={24} lg={10}>
           <Card
-            title="Activities by Type"
+            title="Activity Distribution"
             style={{ borderRadius: "8px", height: "100%" }}
-            headStyle={{ borderBottom: "1px solid #f0f0f0" }}
           >
-            <Table
-              dataSource={stats?.perType || []}
-              columns={typeColumns}
-              rowKey="type"
-              pagination={false}
-              size="small"
-              bordered={false}
-            />
+            {stats?.perType?.map((item: any) => {
+                 const total = stats?.totalActivities || 1;
+                 const percent = ((item.count / total) * 100);
+                 return (
+                     <div key={item.type} style={{ marginBottom: 16 }}>
+                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                             <Text>{item.type}</Text>
+                             <Text strong>{item.count}</Text>
+                         </div>
+                         <Progress percent={parseFloat(percent.toFixed(1))} size="small" />
+                     </div>
+                 )
+            })}
+            {(!stats?.perType || stats.perType.length === 0) && (
+                <div style={{ textAlign: "center", padding: 24 }}>
+                    <SmileOutlined style={{ fontSize: 24, color: "#ccc" }} />
+                    <p>No data available</p>
+                </div>
+            )}
           </Card>
         </Col>
       </Row>
