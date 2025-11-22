@@ -1,6 +1,6 @@
 # FYP Admin Panel (Frontend)
 
-This is a frontend application for the FYP Admin Panel, built with **Vite**, **React**, **TypeScript**, and **Ant Design**. It provides a comprehensive interface for managing users, roles, activities, and reports, featuring role-based access control (RBAC) for Admins, Users, and Viewersfv.
+This is a frontend application for the FYP Admin Panel, built with **Vite**, **React**, **TypeScript**, and **Ant Design**. It provides a comprehensive interface for managing users, roles, activities, and reports, featuring role-based access control (RBAC) for Admins, Users, and Viewers.
 
 ## Features
 
