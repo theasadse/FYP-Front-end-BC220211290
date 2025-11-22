@@ -11,6 +11,14 @@ import { GET_DASHBOARD_STATS } from "../graphql/operations/activities";
 
 const { Title } = Typography;
 
+/**
+ * Admin Dashboard page component.
+ * Displays an overview of system activities using statistics and charts/tables.
+ *
+ * It fetches dashboard statistics using the `GET_DASHBOARD_STATS` GraphQL query.
+ *
+ * @returns {JSX.Element} The rendered Admin Dashboard.
+ */
 export default function AdminDashboard() {
   const { data, loading, error } = useQuery(GET_DASHBOARD_STATS);
   const stats = data?.getDashboardStats;

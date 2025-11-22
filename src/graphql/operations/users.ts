@@ -1,6 +1,15 @@
 import { gql } from "@apollo/client";
 
-// Query 9/11: Users
+/**
+ * GraphQL queries and mutations for managing Users.
+ * @module UserOperations
+ */
+
+/**
+ * Query to fetch all users.
+ *
+ * @returns {object} A list of users with their details (id, name, email, role).
+ */
 export const USERS = gql`
   query Users {
     users {
@@ -15,7 +24,12 @@ export const USERS = gql`
   }
 `;
 
-// Query 10/11: User (single)
+/**
+ * Query to fetch a single user by ID.
+ *
+ * @param {ID} userId - The ID of the user to retrieve.
+ * @returns {object} The user details.
+ */
 export const USER = gql`
   query User($userId: ID!) {
     user(id: $userId) {
@@ -30,7 +44,12 @@ export const USER = gql`
   }
 `;
 
-// Mutation 3/14: CreateUser
+/**
+ * Mutation to create a new user.
+ *
+ * @param {CreateUserInput} input - The data for the new user.
+ * @returns {object} The created user object.
+ */
 export const CREATE_USER = gql`
   mutation CreateUser($input: CreateUserInput!) {
     createUser(input: $input) {
@@ -45,7 +64,13 @@ export const CREATE_USER = gql`
   }
 `;
 
-// Mutation 4/14: UpdateUser
+/**
+ * Mutation to update an existing user.
+ *
+ * @param {ID} updateUserId - The ID of the user to update.
+ * @param {UpdateUserInput} input - The new data for the user.
+ * @returns {object} The updated user object.
+ */
 export const UPDATE_USER = gql`
   mutation UpdateUser($updateUserId: ID!, $input: UpdateUserInput!) {
     updateUser(id: $updateUserId, input: $input) {
@@ -60,7 +85,12 @@ export const UPDATE_USER = gql`
   }
 `;
 
-// Mutation 5/14: DeleteUser
+/**
+ * Mutation to delete a user.
+ *
+ * @param {ID} deleteUserId - The ID of the user to delete.
+ * @returns {boolean} True if the deletion was successful.
+ */
 export const DELETE_USER = gql`
   mutation DeleteUser($deleteUserId: ID!) {
     deleteUser(id: $deleteUserId)

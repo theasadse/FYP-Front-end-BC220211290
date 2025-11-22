@@ -19,6 +19,18 @@ import {
 } from "../graphql/operations/users";
 import { ROLES } from "../graphql/operations/roles";
 
+/**
+ * Users Page component.
+ * Allows managing users (create, read, update, delete).
+ *
+ * Capabilities:
+ * - View a list of users with their details.
+ * - Create new users with name, email, password, and role.
+ * - Edit existing users.
+ * - Delete users.
+ *
+ * @returns {JSX.Element} The rendered Users page.
+ */
 export default function UsersPage() {
   const [data, setData] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
@@ -37,12 +49,21 @@ export default function UsersPage() {
     if (rolesData?.roles) setRoles(rolesData.roles);
   }, [rolesData]);
 
+  /**
+   * Opens the modal for adding a new user.
+   */
   function onAdd() {
     setEditing(null);
     form.resetFields();
     setVisible(true);
   }
 
+  /**
+   * Opens the modal for editing an existing user.
+   * Pre-fills the form with the user data.
+   *
+   * @param {object} record - The user record to edit.
+   */
   function onEdit(record: any) {
     setEditing(record);
     form.setFieldsValue(record);
@@ -50,6 +71,12 @@ export default function UsersPage() {
   }
 
   const [deleteUserMut, { loading: deleteLoading }] = useMutation(DELETE_USER);
+
+  /**
+   * Deletes a user.
+   *
+   * @param {string} id - The ID of the user to delete.
+   */
   async function onDelete(id: string) {
     const hide = messageApi.loading("Deleting user...", 0);
     try {
@@ -65,6 +92,10 @@ export default function UsersPage() {
 
   const [createUserMut, { loading: createLoading }] = useMutation(CREATE_USER);
   const [updateUserMut, { loading: updateLoading }] = useMutation(UPDATE_USER);
+
+  /**
+   * Handles the submission of the user form (add or edit).
+   */
   async function onOk() {
     try {
       const vals = await form.validateFields();

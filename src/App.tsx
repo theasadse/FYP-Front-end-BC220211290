@@ -15,6 +15,16 @@ import apolloClient from "./graphql/apolloClient";
 import ActivitiesPage from "./pages/ActivitiesPage";
 import ReportsPage from "./pages/ReportsPage";
 
+/**
+ * A wrapper component that enforces role-based access control for routes.
+ * It checks if the user is authenticated and if they have the required role.
+ * If not authenticated or authorized, it redirects to the login page.
+ *
+ * @param {object} props - The component props.
+ * @param {React.ReactNode} props.children - The child components to render if access is granted.
+ * @param {string} [props.role] - The required role to access the route (e.g., 'admin', 'user', 'viewer').
+ * @returns {React.ReactNode} The rendered children or a Navigate component for redirection.
+ */
 function PrivateRoute({
   children,
   role,
@@ -37,6 +47,17 @@ function PrivateRoute({
   return <>{children}</>;
 }
 
+/**
+ * The main application component.
+ * It sets up the global providers (ApolloProvider, AuthProvider) and the routing structure.
+ *
+ * The routing includes:
+ * - Public routes: Login, Signup.
+ * - Private routes: Admin, User, and Viewer areas, protected by the PrivateRoute component.
+ * - Default redirect to login.
+ *
+ * @returns {JSX.Element} The root application element.
+ */
 export default function App() {
   return (
     <ApolloProvider client={apolloClient}>

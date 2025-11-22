@@ -1,3 +1,15 @@
+/**
+ * Entry point of the React application.
+ *
+ * This file is responsible for:
+ * 1. Mounting the React application into the DOM.
+ * 2. Configuring the Router (HashRouter).
+ * 3. Applying Ant Design global configuration (ConfigProvider) with a custom theme.
+ * 4. Importing global styles.
+ *
+ * @module Main
+ */
+
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
@@ -6,7 +18,18 @@ import 'antd/dist/reset.css'
 import './styles.css'
 import { ConfigProvider } from 'antd'
 
-createRoot(document.getElementById('root')!).render(
+// Find the root element in the DOM
+const container = document.getElementById('root');
+
+if (!container) {
+  throw new Error('Failed to find the root element');
+}
+
+// Create a root for React to render into
+const root = createRoot(container);
+
+// Render the application
+root.render(
   <React.StrictMode>
   <HashRouter>
       <ConfigProvider

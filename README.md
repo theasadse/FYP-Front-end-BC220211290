@@ -1,30 +1,132 @@
 # FYP Admin Panel (Frontend)
 
-This is a Vite + React + TypeScript starter for the FYP admin panel with Ant Design. It includes a sidebar layout and a role-based login (admin, user, viewer) plus mock data APIs.
+This is a frontend application for the FYP Admin Panel, built with **Vite**, **React**, **TypeScript**, and **Ant Design**. It provides a comprehensive interface for managing users, roles, activities, and reports, featuring role-based access control (RBAC) for Admins, Users, and Viewers.
 
-To run:
+## Features
 
-1. npm install
-2. npm run dev
-# FYP-Front-end-BC220211290
+*   **Role-Based Access Control (RBAC)**: tailored dashboards and permissions for:
+    *   **Admin**: Full access to manage users, roles, activities, and reports.
+    *   **User**: Personal dashboard to view and manage own activities.
+    *   **Viewer**: Read-only access to dashboards and reports.
+*   **Authentication**: Secure login and signup flows with JWT-based authentication (mocked or GraphQL integrated).
+*   **User Management**: Create, read, update, and delete (CRUD) operations for users.
+*   **Role Management**: Dynamic creation and management of user roles.
+*   **Activity Logging**: Track and manage system activities.
+*   **Reporting**: Generate and view reports based on user activities.
+*   **Responsive Design**: Built with Ant Design for a modern and responsive UI.
 
-## CI/CD and DigitalOcean App Platform
+## Tech Stack
 
-This repository includes a GitHub Actions workflow at `.github/workflows/deploy.yml` that will:
+*   **Frontend Framework**: React
+*   **Build Tool**: Vite
+*   **Language**: TypeScript
+*   **UI Library**: Ant Design
+*   **Routing**: React Router (HashRouter)
+*   **State Management / Data Fetching**: Apollo Client (GraphQL) & React Context API
+*   **Styling**: CSS Modules & Ant Design Theme
 
-- Install dependencies and build the app on pushes to `main` (or when manually triggered).
-- If the build succeeds, trigger a deployment on DigitalOcean App Platform via the DigitalOcean API.
+## Getting Started
 
-Required GitHub secrets (set these in your repo settings -> Secrets):
+### Prerequisites
 
-- `DO_API_TOKEN` — A DigitalOcean API token with `write` access to Apps.
-- `DO_APP_ID` — The numeric ID of your DigitalOcean App (find this in the App Platform dashboard or API).
+*   Node.js (v14 or higher recommended)
+*   npm or yarn
 
-Notes on auto-deploy in DigitalOcean:
+### Installation
 
-- If DigitalOcean's "Auto Deploy on Push" is enabled, App Platform will try to build and deploy on every push. This may result in failing deploys if your code needs the CI build step to pass first.
-- Recommendation: disable "Auto Deploy on Push" in the DigitalOcean App settings and let this GitHub Action trigger deployments. That way, only builds that pass CI will cause a production deploy.
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd <repository-directory>
+    ```
 
-If you prefer to keep auto-deploy enabled, you can still use this workflow for an additional safety build; however, double deployments or conflicting builds may occur.
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-If you want the workflow to wait and poll for the DigitalOcean deployment status, or to upload build artifacts into a custom deployment, I can extend the workflow to do that (requires a slightly more complex API call).
+### Running Development Server
+
+To start the development server with hot reload:
+
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:3000` (or another port if 3000 is busy).
+
+### Building for Production
+
+To build the application for production:
+
+```bash
+npm run build
+```
+
+The build artifacts will be stored in the `dist/` directory.
+
+### Previewing Production Build
+
+To locally preview the production build:
+
+```bash
+npm run preview
+```
+
+## Project Structure
+
+```
+├── public/              # Static assets
+├── src/
+│   ├── components/      # Reusable UI components (e.g., MainLayout)
+│   ├── contexts/        # React Contexts (e.g., AuthContext)
+│   ├── graphql/         # GraphQL setup, schema, and operations
+│   │   ├── operations/  # GraphQL queries and mutations
+│   │   ├── apolloClient.ts # Apollo Client configuration
+│   │   └── mockSchema.ts   # Mock data for local development
+│   ├── pages/           # Application pages (Dashboards, Login, etc.)
+│   ├── services/        # API services (e.g., Mock API)
+│   ├── App.tsx          # Main application component and routing
+│   ├── main.tsx         # Entry point
+│   └── styles.css       # Global styles
+├── index.html           # HTML entry point
+├── server.js            # Express server for production serving
+├── vite.config.ts       # Vite configuration
+└── package.json         # Project dependencies and scripts
+```
+
+## CI/CD and Deployment
+
+This repository is configured for automated deployment to the **DigitalOcean App Platform**.
+
+### GitHub Actions
+
+The workflow at `.github/workflows/deploy.yml` handles:
+1.  **Build**: Installs dependencies and builds the project on every push to `main`.
+2.  **Deploy**: Triggers a deployment on DigitalOcean if the build is successful.
+
+**Required Secrets:**
+*   `DO_API_TOKEN`: DigitalOcean API token with write access.
+*   `DO_APP_ID`: The App ID of your DigitalOcean App.
+
+### Manual Deployment
+
+You can also manually deploy the built artifacts using the included `server.js`:
+
+```bash
+node server.js
+```
+
+This starts an Express server serving the `dist` folder on port 8080 (or `process.env.PORT`).
+
+## Documentation
+
+The codebase is fully documented using JSDoc/TSDoc. You can inspect the source code to see detailed descriptions of functions, components, and types.
+
+## Contributing
+
+1.  Fork the repository.
+2.  Create a new feature branch (`git checkout -b feature/my-feature`).
+3.  Commit your changes (`git commit -m 'Add some feature'`).
+4.  Push to the branch (`git push origin feature/my-feature`).
+5.  Open a Pull Request.

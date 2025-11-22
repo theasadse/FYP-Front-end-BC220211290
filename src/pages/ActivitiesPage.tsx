@@ -18,6 +18,12 @@ import {
   DELETE_ACTIVITY,
 } from "../graphql/operations/activities";
 
+/**
+ * Page component for managing Activities.
+ * Displays a table of activities and allows creating, updating, and deleting activities.
+ *
+ * @returns {JSX.Element} The rendered Activities page.
+ */
 export default function ActivitiesPage() {
   const [data, setData] = useState<any[]>([]);
   const { data: activitiesData, loading } = useQuery(ACTIVITIES, {
@@ -32,12 +38,21 @@ export default function ActivitiesPage() {
     if (activitiesData?.activities) setData(activitiesData.activities);
   }, [activitiesData]);
 
+  /**
+   * Opens the modal for adding a new activity.
+   */
   function onAdd() {
     setEditing(null);
     form.resetFields();
     setVisible(true);
   }
 
+  /**
+   * Opens the modal for editing an existing activity.
+   * Pre-fills the form with the activity data.
+   *
+   * @param {object} record - The activity record to edit.
+   */
   function onEdit(record: any) {
     setEditing(record);
     form.setFieldsValue({
@@ -54,6 +69,11 @@ export default function ActivitiesPage() {
   const [deleteActivityMut, { loading: deleteLoading }] =
     useMutation(DELETE_ACTIVITY);
 
+  /**
+   * Deletes an activity.
+   *
+   * @param {string} id - The ID of the activity to delete.
+   */
   async function onDelete(id: string) {
     const hide = messageApi.loading("Deleting activity...", 0);
     try {
@@ -67,6 +87,9 @@ export default function ActivitiesPage() {
     }
   }
 
+  /**
+   * Handles the submission of the activity form (add or edit).
+   */
   async function onOk() {
     try {
       const vals = await form.validateFields();

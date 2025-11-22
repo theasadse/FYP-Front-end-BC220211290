@@ -10,6 +10,10 @@ import { useAuth } from "../contexts/auth";
 
 const { Header, Sider, Content } = Layout;
 
+/**
+ * Navigation menu items configuration.
+ * Each item contains a key (route path) and a label (display text).
+ */
 const items = [
   { key: "/admin", label: "Dashboard" },
   { key: "/admin/activities", label: "Activities" },
@@ -18,6 +22,20 @@ const items = [
   { key: "/admin/roles", label: "Roles" },
 ];
 
+/**
+ * Main layout component for the application.
+ *
+ * This layout includes:
+ * - A collapsible sidebar with navigation menu.
+ * - A header with a toggle button for the sidebar and a user dropdown profile.
+ * - A content area where child components are rendered.
+ *
+ * It uses the `useAuth` hook to get current user information and handle logout.
+ *
+ * @param {object} props - The component props.
+ * @param {React.ReactNode} props.children - The content to render inside the main layout.
+ * @returns {JSX.Element} The rendered layout component.
+ */
 export default function MainLayout({
   children,
 }: {

@@ -8,6 +8,18 @@ import {
   DELETE_ROLE,
 } from "../graphql/operations/roles";
 
+/**
+ * Roles Page component.
+ * Allows managing user roles (create, read, update, delete).
+ *
+ * Capabilities:
+ * - View a list of roles.
+ * - Create new roles.
+ * - Edit existing roles.
+ * - Delete roles.
+ *
+ * @returns {JSX.Element} The rendered Roles page.
+ */
 export default function RolesPage() {
   const [data, setData] = useState<any[]>([]);
   const { data: rolesData, loading } = useQuery(ROLES);
@@ -20,12 +32,21 @@ export default function RolesPage() {
     if (rolesData?.roles) setData(rolesData.roles);
   }, [rolesData]);
 
+  /**
+   * Opens the modal for adding a new role.
+   */
   function onAdd() {
     setEditing(null);
     form.resetFields();
     setVisible(true);
   }
 
+  /**
+   * Opens the modal for editing an existing role.
+   * Pre-fills the form with the role data.
+   *
+   * @param {object} record - The role record to edit.
+   */
   function onEdit(record: any) {
     setEditing(record);
     form.setFieldsValue(record);
@@ -36,6 +57,11 @@ export default function RolesPage() {
   const [updateRoleMut, { loading: updateLoading }] = useMutation(UPDATE_ROLE);
   const [deleteRoleMut, { loading: deleteLoading }] = useMutation(DELETE_ROLE);
 
+  /**
+   * Deletes a role.
+   *
+   * @param {string} id - The ID of the role to delete.
+   */
   async function onDelete(id: string) {
     const hide = messageApi.loading("Deleting role...", 0);
     try {
@@ -49,6 +75,9 @@ export default function RolesPage() {
     }
   }
 
+  /**
+   * Handles the submission of the role form (add or edit).
+   */
   async function onOk() {
     try {
       const vals = await form.validateFields();

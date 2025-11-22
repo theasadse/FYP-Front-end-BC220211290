@@ -1,6 +1,16 @@
 import { gql } from "@apollo/client";
 
-// Query 6/11: Reports
+/**
+ * GraphQL queries and mutations for managing Reports.
+ * @module ReportOperations
+ */
+
+/**
+ * Query to fetch a list of reports.
+ *
+ * @param {ID} [userId] - Filter reports by this user ID.
+ * @returns {object} The list of reports with their details.
+ */
 export const REPORTS = gql`
   query Reports($userId: ID) {
     reports(userId: $userId) {
@@ -17,7 +27,12 @@ export const REPORTS = gql`
   }
 `;
 
-// Query 7/11: Report (single)
+/**
+ * Query to fetch a single report by ID.
+ *
+ * @param {ID} reportId - The ID of the report to retrieve.
+ * @returns {object} The report details.
+ */
 export const REPORT = gql`
   query Report($reportId: ID!) {
     report(id: $reportId) {
@@ -34,7 +49,12 @@ export const REPORT = gql`
   }
 `;
 
-// Mutation 12/14: CreateReport
+/**
+ * Mutation to create a new report.
+ *
+ * @param {CreateReportInput} input - The data for the new report.
+ * @returns {object} The created report object.
+ */
 export const CREATE_REPORT = gql`
   mutation CreateReport($input: CreateReportInput!) {
     createReport(input: $input) {
@@ -51,7 +71,13 @@ export const CREATE_REPORT = gql`
   }
 `;
 
-// Mutation 13/14: UpdateReport
+/**
+ * Mutation to update an existing report.
+ *
+ * @param {ID} updateReportId - The ID of the report to update.
+ * @param {UpdateReportInput} input - The new data for the report.
+ * @returns {object} The updated report object.
+ */
 export const UPDATE_REPORT = gql`
   mutation UpdateReport($updateReportId: ID!, $input: UpdateReportInput!) {
     updateReport(id: $updateReportId, input: $input) {
@@ -67,7 +93,12 @@ export const UPDATE_REPORT = gql`
   }
 `;
 
-// Mutation 14/14: DeleteReport
+/**
+ * Mutation to delete a report.
+ *
+ * @param {ID} deleteReportId - The ID of the report to delete.
+ * @returns {object} The deleted report object (usually just the ID or confirmation).
+ */
 export const DELETE_REPORT = gql`
   mutation DeleteReport($deleteReportId: ID!) {
     deleteReport(id: $deleteReportId) {

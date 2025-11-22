@@ -1,6 +1,15 @@
 import { gql } from "@apollo/client";
 
-// Query 5/11: Me (current user)
+/**
+ * GraphQL queries and mutations for Authentication.
+ * @module AuthOperations
+ */
+
+/**
+ * Query to fetch the current authenticated user.
+ *
+ * @returns {object} The current user's details (id, name, email, role).
+ */
 export const ME = gql`
   query Me {
     me {
@@ -15,7 +24,12 @@ export const ME = gql`
   }
 `;
 
-// Mutation 1/14: Register
+/**
+ * Mutation to register a new user.
+ *
+ * @param {RegisterInput} input - The registration data (name, email, password, etc.).
+ * @returns {object} The authentication token and user details.
+ */
 export const REGISTER = gql`
   mutation Register($input: RegisterInput!) {
     register(input: $input) {
@@ -29,7 +43,12 @@ export const REGISTER = gql`
   }
 `;
 
-// Mutation 2/14: Login
+/**
+ * Mutation to log in a user.
+ *
+ * @param {LoginInput} input - The login credentials (email/username, password).
+ * @returns {object} The authentication token and user details including role.
+ */
 export const LOGIN = gql`
   mutation Login($input: LoginInput!) {
     login(input: $input) {

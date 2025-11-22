@@ -8,11 +8,29 @@ import { LOGIN } from "../graphql/operations/auth";
 
 const { Title } = Typography;
 
+/**
+ * Login Page component.
+ * Allows users to authenticate using their credentials.
+ * Handles both GraphQL-based authentication and a fallback to the AuthContext mechanism.
+ * Redirects the user to their role-specific dashboard upon successful login.
+ *
+ * @returns {JSX.Element} The rendered Login page.
+ */
 export default function LoginPage() {
   const { login, isLoading, error } = useAuth();
   const navigate = useNavigate();
 
   const [loginMut] = useMutation(LOGIN);
+
+  /**
+   * Handles the form submission for login.
+   * Attempts to login via GraphQL mutation first, then falls back to AuthContext.
+   * On success, stores the token and redirects based on the user's role.
+   *
+   * @param {object} values - The form values.
+   * @param {string} values.username - The username entered.
+   * @param {string} values.password - The password entered.
+   */
   const onFinish = async (values: { username: string; password: string }) => {
     try {
       // Use the mutation directly with proper variables
