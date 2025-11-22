@@ -8,7 +8,6 @@ import {
   Form,
   Input,
   Select,
-  DatePicker,
   Popconfirm,
   message,
   Tag,
@@ -22,6 +21,18 @@ import {
   DELETE_REPORT,
 } from "../graphql/operations/reports";
 
+/**
+ * Reports Page component.
+ * Allows managing reports and viewing recent activities.
+ *
+ * Capabilities:
+ * - View a list of reports.
+ * - Create, edit, and delete reports.
+ * - Export activities to JSON.
+ * - View a list of recent activities.
+ *
+ * @returns {JSX.Element} The rendered Reports page.
+ */
 export default function ReportsPage() {
   const [activities, setActivities] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
@@ -40,12 +51,21 @@ export default function ReportsPage() {
     if (reportsData?.reports) setReports(reportsData.reports);
   }, [reportsData]);
 
+  /**
+   * Opens the modal for adding a new report.
+   */
   function onAdd() {
     setEditing(null);
     form.resetFields();
     setVisible(true);
   }
 
+  /**
+   * Opens the modal for editing an existing report.
+   * Pre-fills the form with the report data.
+   *
+   * @param {object} record - The report record to edit.
+   */
   function onEdit(record: any) {
     setEditing(record);
     form.setFieldsValue({
@@ -64,6 +84,11 @@ export default function ReportsPage() {
   const [deleteReportMut, { loading: deleteLoading }] =
     useMutation(DELETE_REPORT);
 
+  /**
+   * Deletes a report.
+   *
+   * @param {string} id - The ID of the report to delete.
+   */
   async function onDelete(id: string) {
     const hide = messageApi.loading("Deleting report...", 0);
     try {
@@ -77,6 +102,9 @@ export default function ReportsPage() {
     }
   }
 
+  /**
+   * Handles the submission of the report form (add or edit).
+   */
   async function onOk() {
     try {
       const vals = await form.validateFields();
@@ -121,6 +149,9 @@ export default function ReportsPage() {
 
   const isSaving = createLoading || updateLoading;
 
+  /**
+   * Exports the current list of activities to a JSON file.
+   */
   async function onExport() {
     // Export activities data as JSON
     const payload = JSON.stringify(activities, null, 2);

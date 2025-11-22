@@ -6,6 +6,17 @@ import { ROLES } from "../graphql/operations/roles";
 import { useNavigate } from "react-router-dom";
 import { LeftOutlined } from "@ant-design/icons";
 
+/**
+ * Signup Page component.
+ * Allows new users to register an account.
+ *
+ * Capabilities:
+ * - Register a new user with username, full name, password, and role.
+ * - Fetches available roles from the backend to populate the role selection dropdown.
+ * - Redirects to the login page upon successful registration.
+ *
+ * @returns {JSX.Element} The rendered Signup page.
+ */
 export default function SignupPage() {
   const [roles, setRoles] = useState<any[]>([]);
   const navigate = useNavigate();
@@ -19,6 +30,16 @@ export default function SignupPage() {
   }, [rolesData]);
 
   const [register, { loading }] = useMutation(REGISTER);
+
+  /**
+   * Handles the form submission for user registration.
+   *
+   * @param {object} vals - The form values.
+   * @param {string} vals.username - The desired username (used as email).
+   * @param {string} vals.name - The user's full name.
+   * @param {string} vals.password - The user's password.
+   * @param {string} vals.role - The selected role name.
+   */
   const onFinish = async (vals: any) => {
     const hide = messageApi.loading("Creating account...", 0);
     try {

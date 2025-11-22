@@ -24,6 +24,18 @@ import { REPORTS } from "../graphql/operations/reports";
 
 const { Title, Text } = Typography;
 
+/**
+ * Viewer Dashboard page component.
+ * Displays a read-only dashboard for users with the 'viewer' role.
+ *
+ * Capabilities:
+ * - Shows a welcome banner.
+ * - Displays summary statistics (Total Activities, Completed, Total Reports).
+ * - Lists recent activities (read-only).
+ * - Lists available reports (read-only).
+ *
+ * @returns {JSX.Element} The rendered Viewer Dashboard.
+ */
 export default function ViewerDashboard() {
   const { data: statsData, loading: statsLoading } =
     useQuery(GET_DASHBOARD_STATS);

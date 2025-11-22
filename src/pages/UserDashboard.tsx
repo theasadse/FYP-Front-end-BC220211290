@@ -21,6 +21,17 @@ import { GET_ACTIVITIES } from "../graphql/operations/activities";
 
 const { Title, Text } = Typography;
 
+/**
+ * User Dashboard page component.
+ * Displays a personalized dashboard for the logged-in user.
+ *
+ * Capabilities:
+ * - Shows a welcome banner with user details.
+ * - Displays statistics on completed and pending activities.
+ * - Lists the user's recent activities.
+ *
+ * @returns {JSX.Element} The rendered User Dashboard.
+ */
 export default function UserDashboard() {
   const { data: userData, loading: userLoading } = useQuery(ME);
   const { data: activitiesData, loading: activitiesLoading } = useQuery(
