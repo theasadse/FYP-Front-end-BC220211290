@@ -70,13 +70,13 @@ export default function LoginPage() {
       }
     } catch (graphqlError: any) {
       console.error("GraphQL Login error:", graphqlError);
-      
+
       // Extract error message from Apollo error
-      const errorMessage = 
-        graphqlError?.message || 
-        graphqlError?.graphQLErrors?.[0]?.message || 
+      const errorMessage =
+        graphqlError?.message ||
+        graphqlError?.graphQLErrors?.[0]?.message ||
         "Invalid credentials";
-      
+
       messageApi.error(errorMessage);
       return; // Don't try fallback for GraphQL errors, just show error
     }

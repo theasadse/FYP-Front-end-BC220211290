@@ -12,7 +12,7 @@
 
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { HashRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import 'antd/dist/reset.css'
 import './styles.css'
@@ -31,7 +31,7 @@ const root = createRoot(container);
 // Render the application
 root.render(
   <React.StrictMode>
-  <HashRouter>
+  <BrowserRouter>
       <ConfigProvider
         theme={{
           token: {
@@ -46,6 +46,6 @@ root.render(
       >
         <App />
       </ConfigProvider>
-  </HashRouter>
+  </BrowserRouter>
   </React.StrictMode>
 )
