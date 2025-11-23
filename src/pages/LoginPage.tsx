@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Button, Form, Input, Typography, Alert, Layout, Space } from "antd";
+import { Card, Button, Form, Input, Typography, Alert, Layout, Space, message } from "antd";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +21,7 @@ const { Content } = Layout;
 export default function LoginPage() {
   const { login, isLoading, error } = useAuth();
   const navigate = useNavigate();
+  const [messageApi, contextHolder] = message.useMessage();
 
   const [loginMut] = useMutation(LOGIN);
 
@@ -55,6 +56,7 @@ export default function LoginPage() {
         const roleName = user?.role?.name;
 
         console.log("Login successful:", { user, roleName });
+        messageApi.success("Login successful!");
 
         if (roleName) {
           // Navigate based on role
@@ -64,10 +66,16 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error("Login error:", error);
+      messageApi.error("GraphQL login failed, trying fallback...");
     }
 
     // Fallback to auth context method if GraphQL fails
-    await login(values.username, values.password);
+    const result = await login(values.username, values.password);
+    if (!result.ok) {
+      messageApi.error(result.error || "Login failed");
+      return;
+    }
+    messageApi.success("Login successful!");
     const raw = localStorage.getItem("fyp_auth");
     if (raw) {
       try {
@@ -86,6 +94,7 @@ export default function LoginPage() {
 
   return (
     <Layout style={{ minHeight: "100vh", background: "#f0f2f5" }}>
+      {contextHolder}
       <Content
         style={{
           display: "flex",

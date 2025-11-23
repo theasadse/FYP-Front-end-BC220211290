@@ -160,15 +160,20 @@ export default function ReportsPage() {
    * Exports the current list of activities to a JSON file.
    */
   async function onExport() {
-    // Export activities data as JSON
-    const payload = JSON.stringify(activities, null, 2);
-    const blob = new Blob([payload], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "activities.json";
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      // Export activities data as JSON
+      const payload = JSON.stringify(activities, null, 2);
+      const blob = new Blob([payload], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "activities.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      messageApi.success("Activities exported successfully");
+    } catch (error: any) {
+      messageApi.error(error.message || "Failed to export activities");
+    }
   }
 
   const reportColumns = [
