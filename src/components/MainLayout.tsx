@@ -1,5 +1,15 @@
 import React from "react";
-import { Layout, Menu, Dropdown, Avatar, Button, theme, Breadcrumb, Badge, Tooltip } from "antd";
+import {
+  Layout,
+  Menu,
+  Dropdown,
+  Avatar,
+  Button,
+  theme,
+  Breadcrumb,
+  Badge,
+  Tooltip,
+} from "antd";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -10,19 +20,20 @@ import {
   TeamOutlined,
   SafetyCertificateOutlined,
   LogoutOutlined,
-  BellOutlined
+  BellOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
 
 const { Header, Sider, Content } = Layout;
 
-/**
- * Navigation menu items configuration.
- */
 const items = [
   { key: "/admin", label: "Dashboard", icon: <DashboardOutlined /> },
-  { key: "/admin/activities", label: "Activities", icon: <UnorderedListOutlined /> },
+  {
+    key: "/admin/activities",
+    label: "Activities",
+    icon: <UnorderedListOutlined />,
+  },
   { key: "/admin/reports", label: "Reports", icon: <FileTextOutlined /> },
   { key: "/admin/users", label: "Users", icon: <TeamOutlined /> },
   { key: "/admin/roles", label: "Roles", icon: <SafetyCertificateOutlined /> },
@@ -79,9 +90,16 @@ export default function MainLayout({
     { title: <Link to="/">Home</Link> },
     ...pathSnippets.map((_, index) => {
       const url = `/${pathSnippets.slice(0, index + 1).join("/")}`;
-      const title = pathSnippets[index].charAt(0).toUpperCase() + pathSnippets[index].slice(1);
+      const title =
+        pathSnippets[index].charAt(0).toUpperCase() +
+        pathSnippets[index].slice(1);
       return {
-        title: index === pathSnippets.length - 1 ? title : <Link to={url}>{title}</Link>,
+        title:
+          index === pathSnippets.length - 1 ? (
+            title
+          ) : (
+            <Link to={url}>{title}</Link>
+          ),
       };
     }),
   ];
@@ -133,7 +151,12 @@ export default function MainLayout({
           items={items}
         />
       </Sider>
-      <Layout style={{ marginLeft: collapsed ? 80 : 200, transition: "margin-left 0.2s" }}>
+      <Layout
+        style={{
+          marginLeft: collapsed ? 80 : 200,
+          transition: "margin-left 0.2s",
+        }}
+      >
         <Header
           style={{
             padding: "0 24px",
@@ -156,20 +179,32 @@ export default function MainLayout({
                 fontSize: "16px",
                 width: 64,
                 height: 64,
-                marginRight: 16
+                marginRight: 16,
               }}
             />
             <Breadcrumb items={breadcrumbItems} />
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-             <Tooltip title="Notifications">
+            <Tooltip title="Notifications">
               <Badge count={3} size="small" offset={[2, 2]}>
-                <Button type="text" icon={<BellOutlined style={{ fontSize: 18 }} />} style={{ display: "flex", alignItems: "center", justifyContent: "center" }} />
+                <Button
+                  type="text"
+                  icon={<BellOutlined style={{ fontSize: 18 }} />}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                />
               </Badge>
             </Tooltip>
 
-            <Dropdown overlay={menu} trigger={["click"]} placement="bottomRight">
+            <Dropdown
+              overlay={menu}
+              trigger={["click"]}
+              placement="bottomRight"
+            >
               <div
                 style={{
                   cursor: "pointer",
@@ -188,10 +223,14 @@ export default function MainLayout({
                   size="default"
                 />
                 <div style={{ lineHeight: "1.2", display: "none" }}>
-                   {/* Hide text on small screens if needed, but flex keeps it okay usually */}
-                  <div style={{ fontWeight: 600, color: "#262626" }}>{user?.name || "User"}</div>
+                  {/* Hide text on small screens if needed, but flex keeps it okay usually */}
+                  <div style={{ fontWeight: 600, color: "#262626" }}>
+                    {user?.name || "User"}
+                  </div>
                   <div style={{ fontSize: 12, color: "#8c8c8c" }}>
-                    {typeof userRole === "string" ? userRole.toUpperCase() : userRole}
+                    {typeof userRole === "string"
+                      ? userRole.toUpperCase()
+                      : userRole}
                   </div>
                 </div>
               </div>
