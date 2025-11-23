@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation } from "@apollo/client";
 import { LOGIN } from "../graphql/operations/auth";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
+import { useState } from "react";
 
 const { Title, Text } = Typography;
 const { Content } = Layout;
@@ -31,6 +32,8 @@ export default function LoginPage() {
   const { login, isLoading, error } = useAuth();
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
+  const [localError, setLocalError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [loginMut] = useMutation(LOGIN);
 
@@ -45,6 +48,9 @@ export default function LoginPage() {
    */
   const onFinish = async (values: { username: string; password: string }) => {
     try {
+      setIsSubmitting(true);
+      setLocalError(null);
+
       // Use the mutation directly with proper variables
       const result = await loginMut({
         variables: {
@@ -63,13 +69,17 @@ export default function LoginPage() {
 
         console.log("Login successful:", { user });
         messageApi.success("Login successful!");
+        setIsSubmitting(false);
 
         // All authenticated users navigate to admin dashboard
         setTimeout(() => navigate("/admin"), 500);
         return;
       }
+      
+      setIsSubmitting(false);
     } catch (graphqlError: any) {
       console.error("GraphQL Login error:", graphqlError);
+      setIsSubmitting(false);
 
       // Extract error message from Apollo error
       const errorMessage =
@@ -77,6 +87,7 @@ export default function LoginPage() {
         graphqlError?.graphQLErrors?.[0]?.message ||
         "Invalid credentials";
 
+      setLocalError(errorMessage);
       messageApi.error(errorMessage);
       return; // Don't try fallback for GraphQL errors, just show error
     }
@@ -110,10 +121,10 @@ export default function LoginPage() {
             </Text>
           </div>
 
-          {error && (
+          {(error || localError) && (
             <Alert
               type="error"
-              message={error}
+              message={error || localError}
               showIcon
               style={{ marginBottom: 24 }}
             />
@@ -135,6 +146,7 @@ export default function LoginPage() {
               <Input
                 prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
                 placeholder="Username (admin | user | viewer)"
+                disabled={isSubmitting}
               />
             </Form.Item>
 
@@ -147,6 +159,7 @@ export default function LoginPage() {
               <Input.Password
                 prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
                 placeholder="Password"
+                disabled={isSubmitting}
               />
             </Form.Item>
 
@@ -155,7 +168,7 @@ export default function LoginPage() {
                 type="primary"
                 htmlType="submit"
                 block
-                loading={isLoading}
+                loading={isSubmitting || isLoading}
               >
                 Sign in
               </Button>
