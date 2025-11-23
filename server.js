@@ -12,13 +12,35 @@
 
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const app = express();
 const port = process.env.PORT || 8080;
 
 const distPath = path.join(__dirname, "dist");
 
 /**
- * Serve static files from the distribution directory.
+ * Serve assets directory explicitly FIRST.
+ * This ensures CSS/JS files are served with correct MIME types.
+ */
+app.use("/assets", express.static(path.join(distPath, "assets"), {
+  maxAge: "31536000",
+  etag: true,
+  immutable: true,
+  setHeaders: (res, filepath) => {
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    // Set correct MIME types
+    if (filepath.endsWith(".js")) {
+      res.setHeader("Content-Type", "application/javascript");
+    } else if (filepath.endsWith(".css")) {
+      res.setHeader("Content-Type", "text/css");
+    } else if (filepath.endsWith(".svg")) {
+      res.setHeader("Content-Type", "image/svg+xml");
+    }
+  },
+}));
+
+/**
+ * Serve other static files from the distribution directory.
  * Configures caching for improved performance.
  *
  * @name StaticFileMiddleware
@@ -40,10 +62,7 @@ app.use(
       if (filepath.endsWith(".html")) {
         res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
         res.setHeader("Pragma", "no-cache");
-      }
-      // Cache static assets (with hash in filename) for longer
-      else if (filepath.includes("/assets/")) {
-        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        res.setHeader("Content-Type", "text/html");
       }
       // Default caching for other files
       else {
@@ -76,7 +95,7 @@ app.get("/favicon.ico", (req, res) => {
 /**
  * SPA fallback middleware.
  * Serves index.html for all non-asset routes to support client-side routing.
- * Skips processing for files with extensions (assumed to be assets).
+ * Only matches routes that don't have file extensions and aren't in the assets directory.
  *
  * @name SPAFallbackMiddleware
  * @function
@@ -85,12 +104,27 @@ app.get("/favicon.ico", (req, res) => {
  * @param {express.NextFunction} next - The next middleware function.
  */
 app.use((req, res, next) => {
-  // Skip for files with extensions (assets)
+  // Skip for files with extensions (assets, images, etc)
   if (path.extname(req.path).length > 0) {
     return next();
   }
 
-  // Serve index.html for all other routes
+  // Skip for API routes or other backend routes
+  if (req.path.startsWith("/api")) {
+    return next();
+  }
+
+  // Check if file exists in dist
+  const filePath = path.join(distPath, req.path);
+  const ext = path.extname(filePath);
+  
+  // If it's a file that exists, let express.static handle it
+  if (ext) {
+    return next();
+  }
+
+  // Serve index.html for SPA routes (no extension)
+  console.log(`📍 SPA Route: ${req.path} → serving index.html`);
   res.sendFile(path.join(distPath, "index.html"), (err) => {
     if (err) {
       console.error("Error serving index.html:", err);
