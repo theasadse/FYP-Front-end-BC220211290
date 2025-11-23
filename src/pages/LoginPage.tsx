@@ -29,13 +29,12 @@ const { Content } = Layout;
  * @returns {JSX.Element} The rendered Login page.
  */
 export default function LoginPage() {
-  const { login, isLoading, error } = useAuth();
+  const { error } = useAuth();
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
   const [localError, setLocalError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [loginMut] = useMutation(LOGIN);
+  const [loginMut, { loading }] = useMutation(LOGIN);
 
   /**
    * Handles the form submission for login.
@@ -48,7 +47,6 @@ export default function LoginPage() {
    */
   const onFinish = async (values: { username: string; password: string }) => {
     try {
-      setIsSubmitting(true);
       setLocalError(null);
 
       // Use the mutation directly with proper variables
@@ -69,17 +67,13 @@ export default function LoginPage() {
 
         console.log("Login successful:", { user });
         messageApi.success("Login successful!");
-        setIsSubmitting(false);
 
         // All authenticated users navigate to admin dashboard
         setTimeout(() => navigate("/admin"), 500);
         return;
       }
-
-      setIsSubmitting(false);
     } catch (graphqlError: any) {
       console.error("GraphQL Login error:", graphqlError);
-      setIsSubmitting(false);
 
       // Extract error message from Apollo error
       const errorMessage =
@@ -146,7 +140,7 @@ export default function LoginPage() {
               <Input
                 prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
                 placeholder="Username (admin | user | viewer)"
-                disabled={isSubmitting}
+                disabled={loading}
               />
             </Form.Item>
 
@@ -159,7 +153,7 @@ export default function LoginPage() {
               <Input.Password
                 prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
                 placeholder="Password"
-                disabled={isSubmitting}
+                disabled={loading}
               />
             </Form.Item>
 
@@ -168,7 +162,7 @@ export default function LoginPage() {
                 type="primary"
                 htmlType="submit"
                 block
-                loading={isSubmitting || isLoading}
+                loading={loading}
               >
                 Sign in
               </Button>
