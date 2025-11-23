@@ -14,9 +14,16 @@ import {
   Typography,
   Space,
   Avatar,
-  Badge
+  Badge,
 } from "antd";
-import { DownloadOutlined, PlusOutlined, EditOutlined, DeleteOutlined, FileTextOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  FileTextOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { useQuery, useMutation } from "@apollo/client";
 import { ACTIVITIES } from "../graphql/operations/activities";
 import {
@@ -181,17 +188,17 @@ export default function ReportsPage() {
     {
       title: "User",
       dataIndex: ["user", "name"],
-      render: (name: string) => name || <Text type="secondary">N/A</Text>
+      render: (name: string) => name || <Text type="secondary">N/A</Text>,
     },
     {
       title: "Type",
       dataIndex: "type",
       render: (type: string) => <Tag color="blue">{type.toUpperCase()}</Tag>,
       filters: [
-        { text: 'Weekly', value: 'weekly' },
-        { text: 'Monthly', value: 'monthly' },
-        { text: 'Quarterly', value: 'quarterly' },
-        { text: 'Annual', value: 'annual' },
+        { text: "Weekly", value: "weekly" },
+        { text: "Monthly", value: "monthly" },
+        { text: "Quarterly", value: "quarterly" },
+        { text: "Annual", value: "annual" },
       ],
       onFilter: (value: any, record: any) => record.type === value,
     },
@@ -199,20 +206,32 @@ export default function ReportsPage() {
       title: "Start Date",
       dataIndex: "start_date",
       render: (date: string) =>
-        date ? new Date(date).toLocaleDateString() : <Text type="secondary">N/A</Text>,
+        date ? (
+          new Date(date).toLocaleDateString()
+        ) : (
+          <Text type="secondary">N/A</Text>
+        ),
     },
     {
       title: "End Date",
       dataIndex: "end_date",
       render: (date: string) =>
-        date ? new Date(date).toLocaleDateString() : <Text type="secondary">N/A</Text>,
+        date ? (
+          new Date(date).toLocaleDateString()
+        ) : (
+          <Text type="secondary">N/A</Text>
+        ),
     },
     {
       title: "Actions",
       width: 150,
       render: (_: any, record: any) => (
         <Space>
-          <Button type="text" icon={<EditOutlined />} onClick={() => onEdit(record)} />
+          <Button
+            type="text"
+            icon={<EditOutlined />}
+            onClick={() => onEdit(record)}
+          />
           <Popconfirm
             title="Delete report?"
             description="This action cannot be undone."
@@ -239,16 +258,21 @@ export default function ReportsPage() {
         }}
       >
         <div>
-          <Title level={2} style={{ margin: 0 }}>Reports</Title>
-          <Text type="secondary">
-            Generate and manage activity reports
-          </Text>
+          <Title level={2} style={{ margin: 0 }}>
+            Reports
+          </Title>
+          <Text type="secondary">Generate and manage activity reports</Text>
         </div>
         <Space>
           <Button icon={<DownloadOutlined />} onClick={onExport}>
             Export JSON
           </Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={onAdd} size="large">
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={onAdd}
+            size="large"
+          >
             Create Report
           </Button>
         </Space>
@@ -263,7 +287,7 @@ export default function ReportsPage() {
           marginBottom: 24,
           backgroundColor: "#fff",
           borderRadius: "8px",
-          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)"
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)",
         }}
         pagination={{
           pageSize: 10,
@@ -288,12 +312,29 @@ export default function ReportsPage() {
             renderItem={(item: any) => (
               <List.Item>
                 <List.Item.Meta
-                  avatar={<Avatar icon={<UserOutlined />} style={{ backgroundColor: "#f0f2f5", color: "#1890ff" }} />}
+                  avatar={
+                    <Avatar
+                      icon={<UserOutlined />}
+                      style={{ backgroundColor: "#f0f2f5", color: "#1890ff" }}
+                    />
+                  }
                   title={
-                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-                       <Text strong>{item.type}</Text>
-                       {item.status && (
-                        <Badge status={item.status === "completed" ? "success" : "processing"} text={item.status} />
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Text strong>{item.type}</Text>
+                      {item.status && (
+                        <Badge
+                          status={
+                            item.status === "completed"
+                              ? "success"
+                              : "processing"
+                          }
+                          text={item.status}
+                        />
                       )}
                     </div>
                   }
@@ -305,7 +346,9 @@ export default function ReportsPage() {
                           : "N/A"}
                       </Text>
                       {item.user?.name && (
-                         <Text type="secondary" style={{ marginLeft: 8 }}>by {item.user.name}</Text>
+                        <Text type="secondary" style={{ marginLeft: 8 }}>
+                          by {item.user.name}
+                        </Text>
                       )}
                     </div>
                   }

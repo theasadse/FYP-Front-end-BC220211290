@@ -16,33 +16,23 @@ import ActivitiesPage from "./pages/ActivitiesPage";
 import ReportsPage from "./pages/ReportsPage";
 
 /**
- * A wrapper component that enforces role-based access control for routes.
- * It checks if the user is authenticated and if they have the required role.
- * If not authenticated or authorized, it redirects to the login page.
+ * A wrapper component that enforces authentication-based access control for routes.
+ * It checks if the user is authenticated only.
+ * Role-based module visibility will be implemented at the component level.
+ * If not authenticated, it redirects to the login page.
  *
  * @param {object} props - The component props.
  * @param {React.ReactNode} props.children - The child components to render if access is granted.
- * @param {string} [props.role] - The required role to access the route (e.g., 'admin', 'user', 'viewer').
  * @returns {React.ReactNode} The rendered children or a Navigate component for redirection.
  */
 function PrivateRoute({
   children,
-  role,
 }: {
   children: React.ReactNode;
-  role?: string;
 }) {
   const { user } = useAuth();
 
   if (!user) return <Navigate to="/login" replace />;
-
-  // Handle both role as string and role as object
-  const userRole = typeof user.role === "string" ? user.role : user.role?.name;
-
-  if (role && userRole !== role) {
-    console.log("Role mismatch:", { required: role, actual: userRole });
-    return <Navigate to="/login" replace />;
-  }
 
   return <>{children}</>;
 }
@@ -70,7 +60,7 @@ export default function App() {
             <Route
               path="/admin/*"
               element={
-                <PrivateRoute role="admin">
+                <PrivateRoute>
                   <MainLayout>
                     <AdminDashboard />
                   </MainLayout>
@@ -81,7 +71,7 @@ export default function App() {
             <Route
               path="/admin/users"
               element={
-                <PrivateRoute role="admin">
+                <PrivateRoute>
                   <MainLayout>
                     <UsersPage />
                   </MainLayout>
@@ -92,7 +82,7 @@ export default function App() {
             <Route
               path="/admin/activities"
               element={
-                <PrivateRoute role="admin">
+                <PrivateRoute>
                   <MainLayout>
                     <ActivitiesPage />
                   </MainLayout>
@@ -103,7 +93,7 @@ export default function App() {
             <Route
               path="/admin/reports"
               element={
-                <PrivateRoute role="admin">
+                <PrivateRoute>
                   <MainLayout>
                     <ReportsPage />
                   </MainLayout>
@@ -114,7 +104,7 @@ export default function App() {
             <Route
               path="/admin/roles"
               element={
-                <PrivateRoute role="admin">
+                <PrivateRoute>
                   <MainLayout>
                     <RolesPage />
                   </MainLayout>
@@ -125,7 +115,7 @@ export default function App() {
             <Route
               path="/user/*"
               element={
-                <PrivateRoute role="user">
+                <PrivateRoute>
                   <MainLayout>
                     <UserDashboard />
                   </MainLayout>
@@ -136,7 +126,7 @@ export default function App() {
             <Route
               path="/viewer/*"
               element={
-                <PrivateRoute role="viewer">
+                <PrivateRoute>
                   <MainLayout>
                     <ViewerDashboard />
                   </MainLayout>

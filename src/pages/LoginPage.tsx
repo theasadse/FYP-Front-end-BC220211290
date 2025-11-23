@@ -1,5 +1,14 @@
-import React from "react";
-import { Card, Button, Form, Input, Typography, Alert, Layout, Space, message } from "antd";
+import {
+  Card,
+  Button,
+  Form,
+  Input,
+  Typography,
+  Alert,
+  Layout,
+  Space,
+  message,
+} from "antd";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
 import { useNavigate } from "react-router-dom";
@@ -52,17 +61,12 @@ export default function LoginPage() {
         // Store auth data in localStorage
         localStorage.setItem("fyp_auth", JSON.stringify({ token, user }));
 
-        // Get role name from the nested role object
-        const roleName = user?.role?.name;
-
-        console.log("Login successful:", { user, roleName });
+        console.log("Login successful:", { user });
         messageApi.success("Login successful!");
 
-        if (roleName) {
-          // Navigate based on role
-          navigate(`/${roleName}`);
-          return;
-        }
+        // All authenticated users navigate to admin dashboard
+        navigate("/admin");
+        return;
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -76,20 +80,8 @@ export default function LoginPage() {
       return;
     }
     messageApi.success("Login successful!");
-    const raw = localStorage.getItem("fyp_auth");
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        const roleName = parsed?.user?.role?.name || parsed?.user?.role;
-        if (roleName) {
-          navigate(`/${roleName}`);
-          return;
-        }
-      } catch (e) {
-        console.error("Parse error:", e);
-      }
-    }
-    navigate("/");
+    // All authenticated users navigate to admin dashboard
+    navigate("/admin");
   };
 
   return (
@@ -104,14 +96,20 @@ export default function LoginPage() {
         }}
       >
         <Card
-          style={{ width: 400, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", borderRadius: "8px" }}
+          style={{
+            width: 400,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            borderRadius: "8px",
+          }}
           bodyStyle={{ padding: "40px 32px" }}
         >
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
             <Title level={3} style={{ marginBottom: "8px", color: "#1890ff" }}>
               FYP Admin Panel
             </Title>
-            <Text type="secondary">Welcome back! Please login to continue.</Text>
+            <Text type="secondary">
+              Welcome back! Please login to continue.
+            </Text>
           </div>
 
           {error && (
@@ -132,7 +130,9 @@ export default function LoginPage() {
           >
             <Form.Item
               name="username"
-              rules={[{ required: true, message: "Please input your username!" }]}
+              rules={[
+                { required: true, message: "Please input your username!" },
+              ]}
             >
               <Input
                 prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
@@ -142,7 +142,9 @@ export default function LoginPage() {
 
             <Form.Item
               name="password"
-              rules={[{ required: true, message: "Please input your password!" }]}
+              rules={[
+                { required: true, message: "Please input your password!" },
+              ]}
             >
               <Input.Password
                 prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
@@ -151,7 +153,12 @@ export default function LoginPage() {
             </Form.Item>
 
             <Form.Item style={{ marginBottom: "12px" }}>
-              <Button type="primary" htmlType="submit" block loading={isLoading}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                loading={isLoading}
+              >
                 Sign in
               </Button>
             </Form.Item>
