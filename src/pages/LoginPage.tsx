@@ -65,23 +65,21 @@ export default function LoginPage() {
         messageApi.success("Login successful!");
 
         // All authenticated users navigate to admin dashboard
-        navigate("/admin");
+        setTimeout(() => navigate("/admin"), 500);
         return;
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      messageApi.error("GraphQL login failed, trying fallback...");
+    } catch (graphqlError: any) {
+      console.error("GraphQL Login error:", graphqlError);
+      
+      // Extract error message from Apollo error
+      const errorMessage = 
+        graphqlError?.message || 
+        graphqlError?.graphQLErrors?.[0]?.message || 
+        "Invalid credentials";
+      
+      messageApi.error(errorMessage);
+      return; // Don't try fallback for GraphQL errors, just show error
     }
-
-    // Fallback to auth context method if GraphQL fails
-    const result = await login(values.username, values.password);
-    if (!result.ok) {
-      messageApi.error(result.error || "Login failed");
-      return;
-    }
-    messageApi.success("Login successful!");
-    // All authenticated users navigate to admin dashboard
-    navigate("/admin");
   };
 
   return (

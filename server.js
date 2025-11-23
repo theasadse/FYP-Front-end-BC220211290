@@ -32,13 +32,22 @@ const distPath = path.join(__dirname, "dist");
  */
 app.use(
   express.static(distPath, {
-    maxAge: "1d",
+    maxAge: "1h",
     etag: true,
     lastModified: true,
     setHeaders: (res, filepath) => {
-      // Cache static assets for longer
-      if (filepath.includes("/assets/")) {
+      // Don't cache HTML files - always get fresh version
+      if (filepath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+        res.setHeader("Pragma", "no-cache");
+      }
+      // Cache static assets (with hash in filename) for longer
+      else if (filepath.includes("/assets/")) {
         res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      }
+      // Default caching for other files
+      else {
+        res.setHeader("Cache-Control", "public, max-age=3600");
       }
     },
   })
