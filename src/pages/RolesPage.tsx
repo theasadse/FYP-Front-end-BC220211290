@@ -56,9 +56,15 @@ export default function RolesPage() {
     setVisible(true);
   }
 
-  const [createRoleMut, { loading: createLoading }] = useMutation(CREATE_ROLE);
-  const [updateRoleMut, { loading: updateLoading }] = useMutation(UPDATE_ROLE);
-  const [deleteRoleMut, { loading: deleteLoading }] = useMutation(DELETE_ROLE);
+  const [createRoleMut, { loading: createLoading }] = useMutation(CREATE_ROLE, {
+    refetchQueries: [{ query: ROLES }],
+  });
+  const [updateRoleMut, { loading: updateLoading }] = useMutation(UPDATE_ROLE, {
+    refetchQueries: [{ query: ROLES }],
+  });
+  const [deleteRoleMut, { loading: deleteLoading }] = useMutation(DELETE_ROLE, {
+    refetchQueries: [{ query: ROLES }],
+  });
 
   /**
    * Deletes a role.
@@ -71,7 +77,6 @@ export default function RolesPage() {
       await deleteRoleMut({ variables: { deleteRoleId: id } });
       hide();
       messageApi.success("Role deleted successfully");
-      setTimeout(() => window.location.reload(), 500);
     } catch (error: any) {
       hide();
       messageApi.error(error.message || "Failed to delete role");
@@ -101,7 +106,6 @@ export default function RolesPage() {
         messageApi.success("Role created successfully");
       }
       setVisible(false);
-      setTimeout(() => window.location.reload(), 500);
     } catch (error: any) {
       messageApi.error(error.message || "Operation failed");
     }

@@ -68,11 +68,21 @@ export default function ActivitiesPage() {
     setVisible(true);
   }
 
-  const [logActivityMut, { loading: logLoading }] = useMutation(LOG_ACTIVITY);
-  const [updateActivityMut, { loading: updateLoading }] =
-    useMutation(UPDATE_ACTIVITY);
-  const [deleteActivityMut, { loading: deleteLoading }] =
-    useMutation(DELETE_ACTIVITY);
+  const [logActivityMut, { loading: logLoading }] = useMutation(LOG_ACTIVITY, {
+    refetchQueries: [{ query: ACTIVITIES, variables: { limit: 100 } }],
+  });
+  const [updateActivityMut, { loading: updateLoading }] = useMutation(
+    UPDATE_ACTIVITY,
+    {
+      refetchQueries: [{ query: ACTIVITIES, variables: { limit: 100 } }],
+    }
+  );
+  const [deleteActivityMut, { loading: deleteLoading }] = useMutation(
+    DELETE_ACTIVITY,
+    {
+      refetchQueries: [{ query: ACTIVITIES, variables: { limit: 100 } }],
+    }
+  );
 
   /**
    * Deletes an activity.
@@ -85,7 +95,6 @@ export default function ActivitiesPage() {
       await deleteActivityMut({ variables: { deleteActivityId: id } });
       hide();
       messageApi.success("Activity deleted successfully");
-      setTimeout(() => window.location.reload(), 500);
     } catch (error: any) {
       hide();
       messageApi.error(error.message || "Failed to delete activity");
@@ -121,7 +130,6 @@ export default function ActivitiesPage() {
         messageApi.success("Activity logged successfully");
       }
       setVisible(false);
-      setTimeout(() => window.location.reload(), 500);
     } catch (error: any) {
       messageApi.error(error.message || "Operation failed");
     }

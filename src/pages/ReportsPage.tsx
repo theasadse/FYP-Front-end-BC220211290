@@ -91,12 +91,24 @@ export default function ReportsPage() {
     setVisible(true);
   }
 
-  const [createReportMut, { loading: createLoading }] =
-    useMutation(CREATE_REPORT);
-  const [updateReportMut, { loading: updateLoading }] =
-    useMutation(UPDATE_REPORT);
-  const [deleteReportMut, { loading: deleteLoading }] =
-    useMutation(DELETE_REPORT);
+  const [createReportMut, { loading: createLoading }] = useMutation(
+    CREATE_REPORT,
+    {
+      refetchQueries: [{ query: REPORTS }],
+    }
+  );
+  const [updateReportMut, { loading: updateLoading }] = useMutation(
+    UPDATE_REPORT,
+    {
+      refetchQueries: [{ query: REPORTS }],
+    }
+  );
+  const [deleteReportMut, { loading: deleteLoading }] = useMutation(
+    DELETE_REPORT,
+    {
+      refetchQueries: [{ query: REPORTS }],
+    }
+  );
 
   /**
    * Deletes a report.
@@ -109,7 +121,6 @@ export default function ReportsPage() {
       await deleteReportMut({ variables: { deleteReportId: id } });
       hide();
       messageApi.success("Report deleted successfully");
-      setTimeout(() => window.location.reload(), 500);
     } catch (error: any) {
       hide();
       messageApi.error(error.message || "Failed to delete report");
@@ -155,7 +166,6 @@ export default function ReportsPage() {
         messageApi.success("Report created successfully");
       }
       setVisible(false);
-      setTimeout(() => window.location.reload(), 500);
     } catch (error: any) {
       messageApi.error(error.message || "Operation failed");
     }

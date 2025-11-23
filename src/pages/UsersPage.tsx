@@ -76,7 +76,9 @@ export default function UsersPage() {
     setVisible(true);
   }
 
-  const [deleteUserMut, { loading: deleteLoading }] = useMutation(DELETE_USER);
+  const [deleteUserMut, { loading: deleteLoading }] = useMutation(DELETE_USER, {
+    refetchQueries: [{ query: USERS }],
+  });
 
   /**
    * Deletes a user.
@@ -89,15 +91,18 @@ export default function UsersPage() {
       await deleteUserMut({ variables: { deleteUserId: id } });
       hide();
       messageApi.success("User deleted successfully");
-      setTimeout(() => window.location.reload(), 500);
     } catch (error: any) {
       hide();
       messageApi.error(error.message || "Failed to delete user");
     }
   }
 
-  const [createUserMut, { loading: createLoading }] = useMutation(CREATE_USER);
-  const [updateUserMut, { loading: updateLoading }] = useMutation(UPDATE_USER);
+  const [createUserMut, { loading: createLoading }] = useMutation(CREATE_USER, {
+    refetchQueries: [{ query: USERS }],
+  });
+  const [updateUserMut, { loading: updateLoading }] = useMutation(UPDATE_USER, {
+    refetchQueries: [{ query: USERS }],
+  });
 
   /**
    * Handles the submission of the user form (add or edit).
@@ -122,7 +127,6 @@ export default function UsersPage() {
         messageApi.success("User created successfully");
       }
       setVisible(false);
-      setTimeout(() => window.location.reload(), 500);
     } catch (error: any) {
       messageApi.error(error.message || "Operation failed");
     }
