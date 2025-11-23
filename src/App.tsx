@@ -25,14 +25,27 @@ import ReportsPage from "./pages/ReportsPage";
  * @param {React.ReactNode} props.children - The child components to render if access is granted.
  * @returns {React.ReactNode} The rendered children or a Navigate component for redirection.
  */
-function PrivateRoute({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
 
   if (!user) return <Navigate to="/login" replace />;
+
+  return <>{children}</>;
+}
+
+/**
+ * A wrapper component that restricts access to public routes (Login, Signup) for authenticated users.
+ * If user is already authenticated, they are redirected to the admin dashboard.
+ * If not authenticated, they can access the public page.
+ *
+ * @param {object} props - The component props.
+ * @param {React.ReactNode} props.children - The child components to render if access is granted.
+ * @returns {React.ReactNode} The rendered children or a Navigate component for redirection.
+ */
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+
+  if (user) return <Navigate to="/admin" replace />;
 
   return <>{children}</>;
 }
@@ -54,8 +67,22 @@ export default function App() {
       <AuthProvider>
         <Layout style={{ minHeight: "100vh" }}>
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <LoginPage />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <PublicRoute>
+                  <SignupPage />
+                </PublicRoute>
+              }
+            />
 
             <Route
               path="/admin/*"
