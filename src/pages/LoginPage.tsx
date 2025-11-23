@@ -75,7 +75,7 @@ export default function LoginPage() {
         setTimeout(() => navigate("/admin"), 500);
         return;
       }
-      
+
       setIsSubmitting(false);
     } catch (graphqlError: any) {
       console.error("GraphQL Login error:", graphqlError);

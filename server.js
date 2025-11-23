@@ -22,22 +22,25 @@ const distPath = path.join(__dirname, "dist");
  * Serve assets directory explicitly FIRST.
  * This ensures CSS/JS files are served with correct MIME types.
  */
-app.use("/assets", express.static(path.join(distPath, "assets"), {
-  maxAge: "31536000",
-  etag: true,
-  immutable: true,
-  setHeaders: (res, filepath) => {
-    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-    // Set correct MIME types
-    if (filepath.endsWith(".js")) {
-      res.setHeader("Content-Type", "application/javascript");
-    } else if (filepath.endsWith(".css")) {
-      res.setHeader("Content-Type", "text/css");
-    } else if (filepath.endsWith(".svg")) {
-      res.setHeader("Content-Type", "image/svg+xml");
-    }
-  },
-}));
+app.use(
+  "/assets",
+  express.static(path.join(distPath, "assets"), {
+    maxAge: "31536000",
+    etag: true,
+    immutable: true,
+    setHeaders: (res, filepath) => {
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      // Set correct MIME types
+      if (filepath.endsWith(".js")) {
+        res.setHeader("Content-Type", "application/javascript");
+      } else if (filepath.endsWith(".css")) {
+        res.setHeader("Content-Type", "text/css");
+      } else if (filepath.endsWith(".svg")) {
+        res.setHeader("Content-Type", "image/svg+xml");
+      }
+    },
+  })
+);
 
 /**
  * Serve other static files from the distribution directory.
@@ -95,42 +98,32 @@ app.get("/favicon.ico", (req, res) => {
 /**
  * SPA fallback middleware.
  * Serves index.html for all non-asset routes to support client-side routing.
- * Only matches routes that don't have file extensions and aren't in the assets directory.
+ * Checks if the requested file exists before serving SPA fallback.
  *
  * @name SPAFallbackMiddleware
- * @function
- * @param {express.Request} req - The request object.
- * @param {express.Response} res - The response object.
- * @param {express.NextFunction} next - The next middleware function.
  */
 app.use((req, res, next) => {
-  // Skip for files with extensions (assets, images, etc)
-  if (path.extname(req.path).length > 0) {
-    return next();
+  // Skip if request has file extension or is for assets
+  if (req.path.includes(".") || req.path.startsWith("/assets")) {
+    return res.status(404).send("Not found");
   }
 
-  // Skip for API routes or other backend routes
-  if (req.path.startsWith("/api")) {
-    return next();
+  // Check if this is actually an asset request by looking at the URL
+  if (req.path.includes("/assets/")) {
+    return res.status(404).send("Asset not found");
   }
 
-  // Check if file exists in dist
-  const filePath = path.join(distPath, req.path);
-  const ext = path.extname(filePath);
+  // For all other routes, serve index.html (SPA routing)
+  const indexPath = path.join(distPath, "index.html");
   
-  // If it's a file that exists, let express.static handle it
-  if (ext) {
-    return next();
+  // Verify file exists before sending
+  if (fs.existsSync(indexPath)) {
+    console.log(`📍 SPA Route: ${req.path} → serving index.html`);
+    res.sendFile(indexPath);
+  } else {
+    console.error(`❌ index.html not found at: ${indexPath}`);
+    res.status(500).send("Application error - index.html not found");
   }
-
-  // Serve index.html for SPA routes (no extension)
-  console.log(`📍 SPA Route: ${req.path} → serving index.html`);
-  res.sendFile(path.join(distPath, "index.html"), (err) => {
-    if (err) {
-      console.error("Error serving index.html:", err);
-      res.status(500).send("Application error");
-    }
-  });
 });
 
 /**
