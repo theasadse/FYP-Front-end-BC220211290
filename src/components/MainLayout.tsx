@@ -20,10 +20,10 @@ import {
   TeamOutlined,
   SafetyCertificateOutlined,
   LogoutOutlined,
-  BellOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
+import NotificationBell from "./NotificationBell";
 
 const { Header, Sider, Content } = Layout;
 
@@ -186,19 +186,7 @@ export default function MainLayout({
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-            <Tooltip title="Notifications">
-              <Badge count={3} size="small" offset={[2, 2]}>
-                <Button
-                  type="text"
-                  icon={<BellOutlined style={{ fontSize: 18 }} />}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                />
-              </Badge>
-            </Tooltip>
+            <NotificationBell />
 
             <Dropdown
               overlay={menu}
