@@ -1,10 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Select, message, Card, Typography, Layout, Space } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  Select,
+  message,
+  Card,
+  Typography,
+  Layout,
+  Space,
+} from "antd";
 import { useMutation, useQuery } from "@apollo/client";
 import { REGISTER } from "../graphql/operations/auth";
 import { ROLES } from "../graphql/operations/roles";
-import { useNavigate, Link } from "react-router-dom";
-import { LeftOutlined, UserOutlined, MailOutlined, LockOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import {
+  LeftOutlined,
+  UserOutlined,
+  MailOutlined,
+  LockOutlined,
+  SafetyCertificateOutlined,
+} from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 const { Content } = Layout;
@@ -78,7 +94,11 @@ export default function SignupPage() {
       >
         {contextHolder}
         <Card
-          style={{ width: 480, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", borderRadius: "8px" }}
+          style={{
+            width: 480,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            borderRadius: "8px",
+          }}
           bodyStyle={{ padding: "32px 32px" }}
         >
           <div style={{ marginBottom: "24px" }}>
@@ -100,31 +120,62 @@ export default function SignupPage() {
             <Form.Item
               name="name"
               label="Full Name"
-              rules={[{ required: true, message: "Please enter your full name" }]}
+              rules={[
+                { required: true, message: "Please enter your full name" },
+              ]}
             >
-              <Input prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="John Doe" />
+              <Input
+                prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+                placeholder="John Doe"
+              />
             </Form.Item>
 
             <Form.Item
               name="username"
-              label="Username"
-              rules={[{ required: true, message: "Please enter a username" }]}
+              label="Email"
+              rules={[
+                {
+                  required: true,
+                  type: "email",
+                  message: "Please enter a valid email",
+                },
+              ]}
             >
-              <Input prefix={<MailOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="johndoe" />
+              <Input
+                prefix={<MailOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+                placeholder="john@university.edu"
+              />
             </Form.Item>
 
             <Form.Item
               name="password"
               label="Password"
-              rules={[{ required: true, min: 6, message: "Password must be at least 6 characters" }]}
+              rules={[
+                {
+                  required: true,
+                  min: 6,
+                  message: "Password must be at least 6 characters",
+                },
+              ]}
             >
-              <Input.Password prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="Password" />
+              <Input.Password
+                prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+                placeholder="Password"
+              />
             </Form.Item>
 
-            <Form.Item name="role" label="Role" rules={[{ required: true, message: "Please select a role" }]}>
+            <Form.Item
+              name="role"
+              label="Role"
+              rules={[{ required: true, message: "Please select a role" }]}
+            >
               <Select
                 placeholder="Select a role"
-                suffixIcon={<SafetyCertificateOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+                suffixIcon={
+                  <SafetyCertificateOutlined
+                    style={{ color: "rgba(0,0,0,.25)" }}
+                  />
+                }
                 options={roles?.map((r) => ({ label: r.name, value: r.name }))}
               />
             </Form.Item>

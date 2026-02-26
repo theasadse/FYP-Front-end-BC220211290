@@ -10,9 +10,14 @@ import {
   message,
   Tag,
   Typography,
-  Space
+  Space,
 } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { useQuery, useMutation } from "@apollo/client";
 import {
   ACTIVITIES,
@@ -75,13 +80,13 @@ export default function ActivitiesPage() {
     UPDATE_ACTIVITY,
     {
       refetchQueries: [{ query: ACTIVITIES, variables: { limit: 100 } }],
-    }
+    },
   );
   const [deleteActivityMut, { loading: deleteLoading }] = useMutation(
     DELETE_ACTIVITY,
     {
       refetchQueries: [{ query: ACTIVITIES, variables: { limit: 100 } }],
-    }
+    },
   );
 
   /**
@@ -92,7 +97,7 @@ export default function ActivitiesPage() {
   async function onDelete(id: string) {
     const hide = messageApi.loading("Deleting activity...", 0);
     try {
-      await deleteActivityMut({ variables: { deleteActivityId: id } });
+      await deleteActivityMut({ variables: { id } });
       hide();
       messageApi.success("Activity deleted successfully");
     } catch (error: any) {
@@ -108,19 +113,19 @@ export default function ActivitiesPage() {
     try {
       const vals = await form.validateFields();
       const activityInput = {
-        userId: Number(vals.instructor_id),
+        userId: vals.instructor_id,
         type: vals.activity,
-        metadata: JSON.stringify({ note: vals["metadata.note"] }),
+        metadata: { note: vals["metadata.note"] },
       };
 
       const hide = messageApi.loading(
         editing ? "Updating activity..." : "Logging activity...",
-        0
+        0,
       );
 
       if (editing) {
         await updateActivityMut({
-          variables: { updateActivityId: editing.id, input: activityInput },
+          variables: { id: editing.id, input: activityInput },
         });
         hide();
         messageApi.success("Activity updated successfully");
@@ -148,15 +153,16 @@ export default function ActivitiesPage() {
       title: "User",
       dataIndex: ["user", "name"],
       render: (name: string) => name || <Text type="secondary">N/A</Text>,
-      sorter: (a: any, b: any) => (a.user?.name || "").localeCompare(b.user?.name || ""),
+      sorter: (a: any, b: any) =>
+        (a.user?.name || "").localeCompare(b.user?.name || ""),
     },
     {
       title: "Activity Type",
       dataIndex: "type",
       filters: [
-        { text: 'MDB Reply', value: 'MDB Reply' },
-        { text: 'Assignment Upload', value: 'Assignment Upload' },
-        { text: 'Ticket Response', value: 'Ticket Response' },
+        { text: "MDB Reply", value: "MDB Reply" },
+        { text: "Assignment Upload", value: "Assignment Upload" },
+        { text: "Ticket Response", value: "Ticket Response" },
       ],
       onFilter: (value: any, record: any) => record.type.indexOf(value) === 0,
     },
@@ -166,14 +172,16 @@ export default function ActivitiesPage() {
       render: (status: string) => (
         <Tag
           color={
-            status === "completed"
+            status === "Completed"
               ? "success"
-              : status === "pending"
-              ? "warning"
-              : "default"
+              : status === "Pending"
+                ? "warning"
+                : status === "Overdue"
+                  ? "error"
+                  : "processing"
           }
         >
-          {status ? status.toUpperCase() : "N/A"}
+          {status || "N/A"}
         </Tag>
       ),
     },
@@ -181,16 +189,25 @@ export default function ActivitiesPage() {
       title: "Timestamp",
       dataIndex: "timestamp",
       render: (timestamp: string) =>
-        timestamp ? new Date(timestamp).toLocaleString() : <Text type="secondary">N/A</Text>,
-      sorter: (a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-      defaultSortOrder: 'descend' as const,
+        timestamp ? (
+          new Date(timestamp).toLocaleString()
+        ) : (
+          <Text type="secondary">N/A</Text>
+        ),
+      sorter: (a: any, b: any) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      defaultSortOrder: "descend" as const,
     },
     {
       title: "Actions",
       width: 150,
       render: (_: any, record: any) => (
         <Space>
-          <Button type="text" icon={<EditOutlined />} onClick={() => onEdit(record)} />
+          <Button
+            type="text"
+            icon={<EditOutlined />}
+            onClick={() => onEdit(record)}
+          />
           <Popconfirm
             title="Delete activity?"
             description="This action cannot be undone."
@@ -217,12 +234,17 @@ export default function ActivitiesPage() {
         }}
       >
         <div>
-          <Title level={2} style={{ margin: 0 }}>Activity Logs</Title>
-          <Text type="secondary">
-            Monitor and manage system activities
-          </Text>
+          <Title level={2} style={{ margin: 0 }}>
+            Activity Logs
+          </Title>
+          <Text type="secondary">Monitor and manage system activities</Text>
         </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={onAdd} size="large">
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={onAdd}
+          size="large"
+        >
           Log Activity
         </Button>
       </div>
@@ -235,12 +257,14 @@ export default function ActivitiesPage() {
         pagination={{
           pageSize: 10,
           showSizeChanger: true,
-          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
         }}
         style={{
           backgroundColor: "#fff",
           borderRadius: "8px",
-          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02)"
+          boxShadow:
+            "0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02)",
         }}
       />
 
@@ -260,25 +284,101 @@ export default function ActivitiesPage() {
           <Form.Item
             name="instructor_id"
             label="Instructor ID"
-            rules={[{ required: true, message: "Please enter the instructor ID" }]}
+            rules={[
+              { required: true, message: "Please enter the instructor ID" },
+            ]}
           >
             <Input placeholder="e.g., 101" />
           </Form.Item>
           <Form.Item
             name="activity"
             label="Activity Type"
-            rules={[{ required: true, message: "Please select an activity type" }]}
+            rules={[
+              { required: true, message: "Please select an activity type" },
+            ]}
           >
             <Select
+              showSearch
               options={[
                 { label: "MDB Reply", value: "MDB Reply" },
+                { label: "MDB Thread Created", value: "MDB Thread Created" },
+                { label: "MDB Post Moderated", value: "MDB Post Moderated" },
+                {
+                  label: "MDB Announcement Posted",
+                  value: "MDB Announcement Posted",
+                },
                 { label: "Assignment Upload", value: "Assignment Upload" },
+                { label: "Assignment Graded", value: "Assignment Graded" },
+                {
+                  label: "Assignment Feedback Given",
+                  value: "Assignment Feedback Given",
+                },
+                {
+                  label: "Assignment Extension Granted",
+                  value: "Assignment Extension Granted",
+                },
+                {
+                  label: "Assignment Deadline Updated",
+                  value: "Assignment Deadline Updated",
+                },
                 { label: "Ticket Response", value: "Ticket Response" },
+                { label: "Ticket Escalated", value: "Ticket Escalated" },
+                { label: "Email Sent", value: "Email Sent" },
+                { label: "Email Broadcast", value: "Email Broadcast" },
+                { label: "Office Hours Held", value: "Office Hours Held" },
+                { label: "GDB Session", value: "GDB Session" },
+                { label: "Zoom Lecture", value: "Zoom Lecture" },
+                {
+                  label: "Recorded Lecture Uploaded",
+                  value: "Recorded Lecture Uploaded",
+                },
+                {
+                  label: "Lab Session Conducted",
+                  value: "Lab Session Conducted",
+                },
+                { label: "Quiz Invigilated", value: "Quiz Invigilated" },
+                { label: "Grading Completed", value: "Grading Completed" },
+                {
+                  label: "Marks Uploaded to Portal",
+                  value: "Marks Uploaded to Portal",
+                },
+                {
+                  label: "Plagiarism Check Run",
+                  value: "Plagiarism Check Run",
+                },
+                {
+                  label: "Re-checking Request Processed",
+                  value: "Re-checking Request Processed",
+                },
+                {
+                  label: "Grade Appeal Reviewed",
+                  value: "Grade Appeal Reviewed",
+                },
+                {
+                  label: "Course Material Uploaded",
+                  value: "Course Material Uploaded",
+                },
+                {
+                  label: "Course Outline Updated",
+                  value: "Course Outline Updated",
+                },
+                {
+                  label: "Student Enrolled Manually",
+                  value: "Student Enrolled Manually",
+                },
+                { label: "Attendance Marked", value: "Attendance Marked" },
+                {
+                  label: "Syllabus Revision Submitted",
+                  value: "Syllabus Revision Submitted",
+                },
               ]}
             />
           </Form.Item>
           <Form.Item name="metadata.note" label="Additional Note">
-            <Input.TextArea rows={3} placeholder="Add any relevant details..." />
+            <Input.TextArea
+              rows={3}
+              placeholder="Add any relevant details..."
+            />
           </Form.Item>
         </Form>
       </Modal>

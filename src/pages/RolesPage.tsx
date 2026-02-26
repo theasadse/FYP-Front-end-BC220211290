@@ -1,6 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Modal, Form, Input, Popconfirm, message, Typography, Space, Tag } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
+import {
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Popconfirm,
+  message,
+  Typography,
+  Space,
+  Tag,
+} from "antd";
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  SafetyCertificateOutlined,
+} from "@ant-design/icons";
 import { useQuery, useMutation } from "@apollo/client";
 import {
   ROLES,
@@ -74,7 +90,7 @@ export default function RolesPage() {
   async function onDelete(id: string) {
     const hide = messageApi.loading("Deleting role...", 0);
     try {
-      await deleteRoleMut({ variables: { deleteRoleId: id } });
+      await deleteRoleMut({ variables: { id } });
       hide();
       messageApi.success("Role deleted successfully");
     } catch (error: any) {
@@ -91,12 +107,12 @@ export default function RolesPage() {
       const vals = await form.validateFields();
       const hide = messageApi.loading(
         editing ? "Updating role..." : "Creating role...",
-        0
+        0,
       );
 
       if (editing) {
         await updateRoleMut({
-          variables: { updateRoleId: editing.id, name: vals.name },
+          variables: { id: editing.id, name: vals.name },
         });
         hide();
         messageApi.success("Role updated successfully");
@@ -114,18 +130,31 @@ export default function RolesPage() {
   const isSaving = createLoading || updateLoading;
 
   const columns = [
-    { title: "ID", dataIndex: "id", width: 80, sorter: (a: any, b: any) => a.id.localeCompare(b.id) },
+    {
+      title: "ID",
+      dataIndex: "id",
+      width: 80,
+      sorter: (a: any, b: any) => a.id.localeCompare(b.id),
+    },
     {
       title: "Role Name",
       dataIndex: "name",
-      render: (name: string) => <Tag icon={<SafetyCertificateOutlined />} color="geekblue">{name.toUpperCase()}</Tag>
+      render: (name: string) => (
+        <Tag icon={<SafetyCertificateOutlined />} color="geekblue">
+          {name.toUpperCase()}
+        </Tag>
+      ),
     },
     {
       title: "Actions",
       width: 150,
       render: (_: any, record: any) => (
         <Space>
-          <Button type="text" icon={<EditOutlined />} onClick={() => onEdit(record)} />
+          <Button
+            type="text"
+            icon={<EditOutlined />}
+            onClick={() => onEdit(record)}
+          />
           <Popconfirm
             title="Delete role?"
             description="This action cannot be undone."
@@ -152,12 +181,19 @@ export default function RolesPage() {
         }}
       >
         <div>
-          <Title level={2} style={{ margin: 0 }}>Manage Roles</Title>
+          <Title level={2} style={{ margin: 0 }}>
+            Manage Roles
+          </Title>
           <Text type="secondary">
             Define user access levels and permissions
           </Text>
         </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={onAdd} size="large">
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={onAdd}
+          size="large"
+        >
           New Role
         </Button>
       </div>
@@ -171,7 +207,11 @@ export default function RolesPage() {
           showSizeChanger: true,
           showTotal: (total) => `Total ${total} roles`,
         }}
-        style={{ backgroundColor: "#fff", borderRadius: "8px", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)" }}
+        style={{
+          backgroundColor: "#fff",
+          borderRadius: "8px",
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)",
+        }}
       />
 
       <Modal
@@ -188,7 +228,14 @@ export default function RolesPage() {
             label="Role Name"
             rules={[{ required: true, message: "Please enter a role name" }]}
           >
-            <Input prefix={<SafetyCertificateOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="e.g., moderator" />
+            <Input
+              prefix={
+                <SafetyCertificateOutlined
+                  style={{ color: "rgba(0,0,0,.25)" }}
+                />
+              }
+              placeholder="e.g., moderator"
+            />
           </Form.Item>
         </Form>
       </Modal>

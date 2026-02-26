@@ -1,18 +1,9 @@
-/**
- * Apollo Client configuration.
- *
- * This file sets up the Apollo Client for making GraphQL requests and subscriptions.
- * It includes:
- * 1. An HTTP link pointing to the GraphQL server.
- * 2. A WebSocket link for subscriptions.
- * 3. An authentication link that adds the Bearer token from localStorage to the headers.
- * 4. A split link to route traffic to HTTP or WebSocket based on the operation type.
- * 5. An in-memory cache for caching GraphQL results.
- *
- * @module ApolloClient
- */
-
-import { ApolloClient, InMemoryCache, createHttpLink, split } from "@apollo/client";
+import {
+  ApolloClient,
+  InMemoryCache,
+  createHttpLink,
+  split,
+} from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
@@ -23,8 +14,7 @@ import { getMainDefinition } from "@apollo/client/utilities";
  * Points to the backend GraphQL endpoint.
  */
 const httpLink = createHttpLink({
-  uri: "https://monkfish-app-me2i3.ondigitalocean.app/graphql",
-  credentials: "include",
+  uri: "http://localhost:4000/graphql",
 });
 
 /**
@@ -34,7 +24,7 @@ const httpLink = createHttpLink({
  */
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: "wss://monkfish-app-me2i3.ondigitalocean.app/graphql",
+    url: "ws://localhost:4000/graphql",
     connectionParams: () => {
       try {
         const raw = localStorage.getItem("fyp_auth");
@@ -47,7 +37,7 @@ const wsLink = new GraphQLWsLink(
         return {};
       }
     },
-  })
+  }),
 );
 
 /**
@@ -67,7 +57,7 @@ const authLink = setContext(
     } catch (e) {
       return { headers };
     }
-  }
+  },
 );
 
 /**
@@ -83,7 +73,7 @@ const splitLink = split(
     );
   },
   wsLink,
-  authLink.concat(httpLink)
+  authLink.concat(httpLink),
 );
 
 /**

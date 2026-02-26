@@ -146,7 +146,7 @@ export default function MainLayout({
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={[location.pathname]}
+          selectedKeys={[location.pathname]}
           onClick={(e) => navigate(e.key)}
           items={items}
         />

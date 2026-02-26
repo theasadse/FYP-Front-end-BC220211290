@@ -1,12 +1,21 @@
 import React, { useEffect } from "react";
-import { Badge, Dropdown, Menu, Typography, List, Button, Empty, Tooltip } from "antd";
+import {
+  Badge,
+  Dropdown,
+  Menu,
+  Typography,
+  List,
+  Button,
+  Empty,
+  Tooltip,
+} from "antd";
 import { BellOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { useQuery, useMutation } from "@apollo/client";
 import { useAuth } from "../contexts/auth";
 import {
   NOTIFICATIONS_QUERY,
   NOTIFICATION_SUBSCRIPTION,
-  MARK_AS_READ_MUTATION,
+  MARK_NOTIFICATION_READ,
 } from "../graphql/operations/notifications";
 
 const { Text } = Typography;
@@ -21,12 +30,15 @@ export default function NotificationBell() {
   const { user } = useAuth();
 
   // Skip query if no user is logged in
-  const { data, loading, subscribeToMore, refetch } = useQuery(NOTIFICATIONS_QUERY, {
-    skip: !user?.id,
-    fetchPolicy: "cache-and-network",
-  });
+  const { data, loading, subscribeToMore, refetch } = useQuery(
+    NOTIFICATIONS_QUERY,
+    {
+      skip: !user?.id,
+      fetchPolicy: "cache-and-network",
+    },
+  );
 
-  const [markAsRead] = useMutation(MARK_AS_READ_MUTATION);
+  const [markAsRead] = useMutation(MARK_NOTIFICATION_READ);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -59,11 +71,19 @@ export default function NotificationBell() {
 
   const handleMarkAsRead = async (id: string) => {
     try {
-      await markAsRead({ variables: { id } });
-      // Optimistically update or refetch
+      await markAsRead({ variables: { id, all: false } });
       refetch();
     } catch (e) {
       console.error("Failed to mark as read", e);
+    }
+  };
+
+  const handleMarkAll = async () => {
+    try {
+      await markAsRead({ variables: { all: true } });
+      refetch();
+    } catch (e) {
+      console.error("Failed to mark all as read", e);
     }
   };
 
@@ -73,7 +93,8 @@ export default function NotificationBell() {
         width: 350,
         backgroundColor: "#fff",
         borderRadius: "8px",
-        boxShadow: "0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05)",
+        boxShadow:
+          "0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05)",
       }}
     >
       <div
@@ -86,13 +107,23 @@ export default function NotificationBell() {
         }}
       >
         <Text strong>Notifications</Text>
-        {unreadCount > 0 && (
-          <Badge count={unreadCount} style={{ backgroundColor: "#1890ff" }} />
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {unreadCount > 0 && (
+            <Badge count={unreadCount} style={{ backgroundColor: "#1890ff" }} />
+          )}
+          {unreadCount > 0 && (
+            <Button type="link" size="small" onClick={handleMarkAll}>
+              Mark all read
+            </Button>
+          )}
+        </div>
       </div>
       <div style={{ maxHeight: "400px", overflowY: "auto" }}>
         {notifications.length === 0 ? (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No notifications" />
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description="No notifications"
+          />
         ) : (
           <List
             itemLayout="horizontal"

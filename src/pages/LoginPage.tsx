@@ -13,7 +13,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@apollo/client";
-import { LOGIN } from "../graphql/operations/auth";
+import { LOGIN, CHECK_DEADLINES } from "../graphql/operations/auth";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
@@ -29,12 +29,13 @@ const { Content } = Layout;
  * @returns {JSX.Element} The rendered Login page.
  */
 export default function LoginPage() {
-  const { error } = useAuth();
+  const { error, setAuthData } = useAuth();
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
   const [localError, setLocalError] = useState<string | null>(null);
 
   const [loginMut, { loading }] = useMutation(LOGIN);
+  const [checkDeadlinesMut] = useMutation(CHECK_DEADLINES);
 
   /**
    * Handles the form submission for login.
@@ -62,13 +63,18 @@ export default function LoginPage() {
       if (result.data?.login) {
         const { token, user } = result.data.login;
 
-        // Store auth data in localStorage
-        localStorage.setItem("fyp_auth", JSON.stringify({ token, user }));
+        // Update auth context immediately (this triggers re-render)
+        setAuthData(user, token);
+
+        // Fire deadline check in the background — per API spec
+        checkDeadlinesMut().catch(() => {
+          /* silently ignore */
+        });
 
         console.log("Login successful:", { user });
         messageApi.success("Login successful!");
 
-        // All authenticated users navigate to admin dashboard
+        // Navigate to admin dashboard
         setTimeout(() => navigate("/admin"), 500);
         return;
       }
@@ -158,12 +164,7 @@ export default function LoginPage() {
             </Form.Item>
 
             <Form.Item style={{ marginBottom: "12px" }}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                block
-                loading={loading}
-              >
+              <Button type="primary" htmlType="submit" block loading={loading}>
                 Sign in
               </Button>
             </Form.Item>

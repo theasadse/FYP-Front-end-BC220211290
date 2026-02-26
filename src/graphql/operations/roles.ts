@@ -42,8 +42,8 @@ export const CREATE_ROLE = gql`
  * @returns {object} The updated role object.
  */
 export const UPDATE_ROLE = gql`
-  mutation UpdateRole($updateRoleId: ID!, $name: String!) {
-    updateRole(id: $updateRoleId, name: $name) {
+  mutation UpdateRole($id: ID!, $name: String!) {
+    updateRole(id: $id, name: $name) {
       id
       name
     }
@@ -53,11 +53,11 @@ export const UPDATE_ROLE = gql`
 /**
  * Mutation to delete a role.
  *
- * @param {ID} deleteRoleId - The ID of the role to delete.
+ * @param {ID} id - The ID of the role to delete.
  * @returns {boolean} True if the deletion was successful.
  */
 export const DELETE_ROLE = gql`
-  mutation DeleteRole($deleteRoleId: ID!) {
-    deleteRole(id: $deleteRoleId)
+  mutation DeleteRole($id: ID!) {
+    deleteRole(id: $id)
   }
 `;

@@ -95,19 +95,19 @@ export default function ReportsPage() {
     CREATE_REPORT,
     {
       refetchQueries: [{ query: REPORTS }],
-    }
+    },
   );
   const [updateReportMut, { loading: updateLoading }] = useMutation(
     UPDATE_REPORT,
     {
       refetchQueries: [{ query: REPORTS }],
-    }
+    },
   );
   const [deleteReportMut, { loading: deleteLoading }] = useMutation(
     DELETE_REPORT,
     {
       refetchQueries: [{ query: REPORTS }],
-    }
+    },
   );
 
   /**
@@ -118,7 +118,7 @@ export default function ReportsPage() {
   async function onDelete(id: string) {
     const hide = messageApi.loading("Deleting report...", 0);
     try {
-      await deleteReportMut({ variables: { deleteReportId: id } });
+      await deleteReportMut({ variables: { id } });
       hide();
       messageApi.success("Report deleted successfully");
     } catch (error: any) {
@@ -135,13 +135,13 @@ export default function ReportsPage() {
       const vals = await form.validateFields();
       const hide = messageApi.loading(
         editing ? "Updating report..." : "Creating report...",
-        0
+        0,
       );
 
       if (editing) {
         await updateReportMut({
           variables: {
-            updateReportId: editing.id,
+            id: editing.id,
             input: {
               startDate: vals.startDate,
               endDate: vals.endDate,
@@ -205,10 +205,10 @@ export default function ReportsPage() {
       dataIndex: "type",
       render: (type: string) => <Tag color="blue">{type.toUpperCase()}</Tag>,
       filters: [
-        { text: "Weekly", value: "weekly" },
-        { text: "Monthly", value: "monthly" },
-        { text: "Quarterly", value: "quarterly" },
-        { text: "Annual", value: "annual" },
+        { text: "Monthly Activity Summary", value: "Monthly Activity Summary" },
+        { text: "Quarterly Review", value: "Quarterly Review" },
+        { text: "Semester Report", value: "Semester Report" },
+        { text: "Annual Report", value: "Annual Report" },
       ],
       onFilter: (value: any, record: any) => record.type === value,
     },
@@ -394,10 +394,13 @@ export default function ReportsPage() {
           >
             <Select
               options={[
-                { label: "Weekly Report", value: "weekly" },
-                { label: "Monthly Report", value: "monthly" },
-                { label: "Quarterly Report", value: "quarterly" },
-                { label: "Annual Report", value: "annual" },
+                {
+                  label: "Monthly Activity Summary",
+                  value: "Monthly Activity Summary",
+                },
+                { label: "Quarterly Review", value: "Quarterly Review" },
+                { label: "Semester Report", value: "Semester Report" },
+                { label: "Annual Report", value: "Annual Report" },
               ]}
             />
           </Form.Item>

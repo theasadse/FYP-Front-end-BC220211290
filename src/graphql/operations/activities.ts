@@ -63,6 +63,7 @@ export const GET_ACTIVITIES = gql`
       user {
         id
         name
+        email
       }
       type
       timestamp
@@ -120,8 +121,8 @@ export const LOG_ACTIVITY = gql`
  * @returns {object} The updated activity object.
  */
 export const UPDATE_ACTIVITY = gql`
-  mutation UpdateActivity($updateActivityId: ID!, $input: ActivityInput!) {
-    updateActivity(id: $updateActivityId, input: $input) {
+  mutation UpdateActivity($id: ID!, $input: ActivityInput!) {
+    updateActivity(id: $id, input: $input) {
       id
       user {
         id
@@ -142,19 +143,19 @@ export const UPDATE_ACTIVITY = gql`
  * @returns {boolean} True if the deletion was successful.
  */
 export const DELETE_ACTIVITY = gql`
-  mutation DeleteActivity($deleteActivityId: ID!) {
-    deleteActivity(id: $deleteActivityId)
+  mutation DeleteActivity($id: ID!) {
+    deleteActivity(id: $id)
   }
 `;
 
 /**
- * Subscription to listen for new activities.
+ * Subscription to listen for new activities being logged.
  *
  * @returns {object} The newly created activity.
  */
-export const ACTIVITY_ADDED = gql`
-  subscription ActivityAdded {
-    activityAdded {
+export const NEW_ACTIVITY_LOGGED = gql`
+  subscription NewActivityLogged {
+    newActivityLogged {
       id
       user {
         id
@@ -163,7 +164,6 @@ export const ACTIVITY_ADDED = gql`
       type
       timestamp
       status
-      metadata
     }
   }
 `;

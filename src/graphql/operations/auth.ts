@@ -38,6 +38,10 @@ export const REGISTER = gql`
         id
         name
         email
+        role {
+          id
+          name
+        }
       }
     }
   }
@@ -58,9 +62,23 @@ export const LOGIN = gql`
         name
         email
         role {
+          id
           name
         }
       }
+    }
+  }
+`;
+
+/**
+ * Mutation to check for overdue activities and fire deadline notifications.
+ * Call this immediately after a successful login.
+ */
+export const CHECK_DEADLINES = gql`
+  mutation CheckDeadlines {
+    checkDeadlines {
+      processed
+      notificationsSent
     }
   }
 `;

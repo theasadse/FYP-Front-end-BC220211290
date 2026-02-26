@@ -11,9 +11,17 @@ import {
   Tag,
   Typography,
   Space,
-  Avatar
+  Avatar,
 } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined, MailOutlined, LockOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  UserOutlined,
+  MailOutlined,
+  LockOutlined,
+  SafetyCertificateOutlined,
+} from "@ant-design/icons";
 import { useQuery, useMutation } from "@apollo/client";
 import {
   USERS,
@@ -88,7 +96,7 @@ export default function UsersPage() {
   async function onDelete(id: string) {
     const hide = messageApi.loading("Deleting user...", 0);
     try {
-      await deleteUserMut({ variables: { deleteUserId: id } });
+      await deleteUserMut({ variables: { id } });
       hide();
       messageApi.success("User deleted successfully");
     } catch (error: any) {
@@ -112,12 +120,12 @@ export default function UsersPage() {
       const vals = await form.validateFields();
       const hide = messageApi.loading(
         editing ? "Updating user..." : "Creating user...",
-        0
+        0,
       );
 
       if (editing) {
         await updateUserMut({
-          variables: { updateUserId: editing.id, input: vals },
+          variables: { id: editing.id, input: vals },
         });
         hide();
         messageApi.success("User updated successfully");
@@ -146,8 +154,12 @@ export default function UsersPage() {
       dataIndex: "name",
       render: (name: string) => (
         <Space>
-           <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#1890ff' }} size="small" />
-           {name}
+          <Avatar
+            icon={<UserOutlined />}
+            style={{ backgroundColor: "#1890ff" }}
+            size="small"
+          />
+          {name}
         </Space>
       ),
       sorter: (a: any, b: any) => a.name.localeCompare(b.name),
@@ -160,13 +172,13 @@ export default function UsersPage() {
       title: "Role",
       dataIndex: ["role", "name"],
       render: (role: string) => {
-        let color = 'default';
-        if (role === 'admin') color = 'magenta';
-        if (role === 'user') color = 'green';
-        if (role === 'viewer') color = 'blue';
-        return <Tag color={color}>{role ? role.toUpperCase() : "N/A"}</Tag>;
+        let color = "default";
+        if (role === "ADMIN" || role === "SUPER_ADMIN") color = "magenta";
+        if (role === "INSTRUCTOR") color = "green";
+        if (role === "VIEWER") color = "blue";
+        return <Tag color={color}>{role || "N/A"}</Tag>;
       },
-      filters: roles.map(r => ({ text: r.name, value: r.name })),
+      filters: roles.map((r) => ({ text: r.name, value: r.name })),
       onFilter: (value: any, record: any) => record.role?.name === value,
     },
     {
@@ -174,7 +186,11 @@ export default function UsersPage() {
       width: 150,
       render: (_: any, record: any) => (
         <Space>
-          <Button type="text" icon={<EditOutlined />} onClick={() => onEdit(record)} />
+          <Button
+            type="text"
+            icon={<EditOutlined />}
+            onClick={() => onEdit(record)}
+          />
           <Popconfirm
             title="Delete user?"
             description="This action cannot be undone."
@@ -201,12 +217,17 @@ export default function UsersPage() {
         }}
       >
         <div>
-          <Title level={2} style={{ margin: 0 }}>Manage Users</Title>
-          <Text type="secondary">
-            Create, update, and manage user accounts
-          </Text>
+          <Title level={2} style={{ margin: 0 }}>
+            Manage Users
+          </Title>
+          <Text type="secondary">Create, update, and manage user accounts</Text>
         </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={onAdd} size="large">
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={onAdd}
+          size="large"
+        >
           New User
         </Button>
       </div>
@@ -220,7 +241,11 @@ export default function UsersPage() {
           showSizeChanger: true,
           showTotal: (total) => `Total ${total} users`,
         }}
-        style={{ backgroundColor: "#fff", borderRadius: "8px", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)" }}
+        style={{
+          backgroundColor: "#fff",
+          borderRadius: "8px",
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)",
+        }}
       />
 
       <Modal
@@ -232,29 +257,62 @@ export default function UsersPage() {
         okText={editing ? "Update" : "Create"}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="name" label="Full Name" rules={[{ required: true, message: "Please enter full name" }]}>
-            <Input prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="John Doe" />
+          <Form.Item
+            name="name"
+            label="Full Name"
+            rules={[{ required: true, message: "Please enter full name" }]}
+          >
+            <Input
+              prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+              placeholder="John Doe"
+            />
           </Form.Item>
           <Form.Item
             name="email"
             label="Email"
-            rules={[{ required: true, type: "email", message: "Please enter a valid email" }]}
+            rules={[
+              {
+                required: true,
+                type: "email",
+                message: "Please enter a valid email",
+              },
+            ]}
           >
-            <Input prefix={<MailOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="john@example.com" />
+            <Input
+              prefix={<MailOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+              placeholder="john@example.com"
+            />
           </Form.Item>
           {!editing && (
             <Form.Item
               name="password"
               label="Password"
-              rules={[{ required: true, min: 6, message: "Password must be at least 6 characters" }]}
+              rules={[
+                {
+                  required: true,
+                  min: 6,
+                  message: "Password must be at least 6 characters",
+                },
+              ]}
             >
-              <Input.Password prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />} placeholder="Min 6 characters" />
+              <Input.Password
+                prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+                placeholder="Min 6 characters"
+              />
             </Form.Item>
           )}
-          <Form.Item name="roleName" label="Role" rules={[{ required: true, message: "Please select a role" }]}>
+          <Form.Item
+            name="roleName"
+            label="Role"
+            rules={[{ required: true, message: "Please select a role" }]}
+          >
             <Select
               placeholder="Select a role"
-              suffixIcon={<SafetyCertificateOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+              suffixIcon={
+                <SafetyCertificateOutlined
+                  style={{ color: "rgba(0,0,0,.25)" }}
+                />
+              }
               options={roles.map((r) => ({ label: r.name, value: r.name }))}
             />
           </Form.Item>

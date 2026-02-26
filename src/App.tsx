@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { Layout } from "antd";
 import LoginPage from "./pages/LoginPage";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -16,17 +16,16 @@ import ActivitiesPage from "./pages/ActivitiesPage";
 import ReportsPage from "./pages/ReportsPage";
 
 /**
- * A wrapper component that enforces authentication-based access control for routes.
- * It checks if the user is authenticated only.
- * Role-based module visibility will be implemented at the component level.
- * If not authenticated, it redirects to the login page.
- *
- * @param {object} props - The component props.
- * @param {React.ReactNode} props.children - The child components to render if access is granted.
- * @returns {React.ReactNode} The rendered children or a Navigate component for redirection.
+ * Guards private routes — redirects to /login when not authenticated.
+ * Preserves the intended destination so after login the user can be
+ * sent back to where they were trying to go (future enhancement).
  */
 function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, isInitialising } = useAuth();
+
+  // While localStorage is still being read, render nothing to avoid a
+  // premature redirect to /login on hard refresh.
+  if (isInitialising) return null;
 
   if (!user) return <Navigate to="/login" replace />;
 
@@ -34,16 +33,13 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * A wrapper component that restricts access to public routes (Login, Signup) for authenticated users.
- * If user is already authenticated, they are redirected to the admin dashboard.
- * If not authenticated, they can access the public page.
- *
- * @param {object} props - The component props.
- * @param {React.ReactNode} props.children - The child components to render if access is granted.
- * @returns {React.ReactNode} The rendered children or a Navigate component for redirection.
+ * Guards public-only routes (Login, Signup).
+ * Authenticated users are sent to /admin instead of seeing these pages.
  */
 function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, isInitialising } = useAuth();
+
+  if (isInitialising) return null;
 
   if (user) return <Navigate to="/admin" replace />;
 
@@ -51,22 +47,27 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * The main application component.
- * It sets up the global providers (ApolloProvider, AuthProvider) and the routing structure.
- *
- * The routing includes:
- * - Public routes: Login, Signup.
- * - Private routes: Admin, User, and Viewer areas, protected by the PrivateRoute component.
- * - Default redirect to login.
- *
- * @returns {JSX.Element} The root application element.
+ * Wraps all /admin/* routes in a single parent so that exact sub-routes
+ * (users, roles, activities, reports) are matched correctly and the
+ * AdminDashboard only renders on the exact /admin path.
  */
+function AdminRoutes() {
+  return (
+    <PrivateRoute>
+      <MainLayout>
+        <Outlet />
+      </MainLayout>
+    </PrivateRoute>
+  );
+}
+
 export default function App() {
   return (
     <ApolloProvider client={apolloClient}>
       <AuthProvider>
         <Layout style={{ minHeight: "100vh" }}>
           <Routes>
+            {/* Public routes */}
             <Route
               path="/login"
               element={
@@ -84,61 +85,16 @@ export default function App() {
               }
             />
 
-            <Route
-              path="/admin/*"
-              element={
-                <PrivateRoute>
-                  <MainLayout>
-                    <AdminDashboard />
-                  </MainLayout>
-                </PrivateRoute>
-              }
-            />
+            {/* Protected admin routes — nested so sub-paths match exactly */}
+            <Route path="/admin" element={<AdminRoutes />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<UsersPage />} />
+              <Route path="activities" element={<ActivitiesPage />} />
+              <Route path="reports" element={<ReportsPage />} />
+              <Route path="roles" element={<RolesPage />} />
+            </Route>
 
-            <Route
-              path="/admin/users"
-              element={
-                <PrivateRoute>
-                  <MainLayout>
-                    <UsersPage />
-                  </MainLayout>
-                </PrivateRoute>
-              }
-            />
-
-            <Route
-              path="/admin/activities"
-              element={
-                <PrivateRoute>
-                  <MainLayout>
-                    <ActivitiesPage />
-                  </MainLayout>
-                </PrivateRoute>
-              }
-            />
-
-            <Route
-              path="/admin/reports"
-              element={
-                <PrivateRoute>
-                  <MainLayout>
-                    <ReportsPage />
-                  </MainLayout>
-                </PrivateRoute>
-              }
-            />
-
-            <Route
-              path="/admin/roles"
-              element={
-                <PrivateRoute>
-                  <MainLayout>
-                    <RolesPage />
-                  </MainLayout>
-                </PrivateRoute>
-              }
-            />
-
+            {/* Other role dashboards */}
             <Route
               path="/user/*"
               element={
@@ -149,7 +105,6 @@ export default function App() {
                 </PrivateRoute>
               }
             />
-
             <Route
               path="/viewer/*"
               element={
@@ -161,10 +116,15 @@ export default function App() {
               }
             />
 
+            {/* Root redirect */}
             <Route path="/" element={<Navigate to="/login" replace />} />
+
+            {/* Catch-all — send unknown paths to login */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Layout>
       </AuthProvider>
     </ApolloProvider>
   );
 }
+

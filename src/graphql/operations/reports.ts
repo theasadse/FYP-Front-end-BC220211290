@@ -79,8 +79,8 @@ export const CREATE_REPORT = gql`
  * @returns {object} The updated report object.
  */
 export const UPDATE_REPORT = gql`
-  mutation UpdateReport($updateReportId: ID!, $input: UpdateReportInput!) {
-    updateReport(id: $updateReportId, input: $input) {
+  mutation UpdateReport($id: ID!, $input: UpdateReportInput!) {
+    updateReport(id: $id, input: $input) {
       id
       user {
         name
@@ -96,21 +96,13 @@ export const UPDATE_REPORT = gql`
 /**
  * Mutation to delete a report.
  *
- * @param {ID} deleteReportId - The ID of the report to delete.
- * @returns {object} The deleted report object (usually just the ID or confirmation).
+ * @param {ID} id - The ID of the report to delete.
+ * @returns {object} The deleted report ID.
  */
 export const DELETE_REPORT = gql`
-  mutation DeleteReport($deleteReportId: ID!) {
-    deleteReport(id: $deleteReportId) {
+  mutation DeleteReport($id: ID!) {
+    deleteReport(id: $id) {
       id
-      user {
-        id
-        name
-      }
-      start_date
-      end_date
-      type
-      content
     }
   }
 `;

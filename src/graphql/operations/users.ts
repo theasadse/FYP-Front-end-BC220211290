@@ -31,8 +31,8 @@ export const USERS = gql`
  * @returns {object} The user details.
  */
 export const USER = gql`
-  query User($userId: ID!) {
-    user(id: $userId) {
+  query User($id: ID!) {
+    user(id: $id) {
       id
       name
       email
@@ -72,8 +72,8 @@ export const CREATE_USER = gql`
  * @returns {object} The updated user object.
  */
 export const UPDATE_USER = gql`
-  mutation UpdateUser($updateUserId: ID!, $input: UpdateUserInput!) {
-    updateUser(id: $updateUserId, input: $input) {
+  mutation UpdateUser($id: ID!, $input: UpdateUserInput!) {
+    updateUser(id: $id, input: $input) {
       id
       name
       email
@@ -88,11 +88,11 @@ export const UPDATE_USER = gql`
 /**
  * Mutation to delete a user.
  *
- * @param {ID} deleteUserId - The ID of the user to delete.
+ * @param {ID} id - The ID of the user to delete.
  * @returns {boolean} True if the deletion was successful.
  */
 export const DELETE_USER = gql`
-  mutation DeleteUser($deleteUserId: ID!) {
-    deleteUser(id: $deleteUserId)
+  mutation DeleteUser($id: ID!) {
+    deleteUser(id: $id)
   }
 `;

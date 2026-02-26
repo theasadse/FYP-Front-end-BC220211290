@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const NOTIFICATIONS_QUERY = gql`
-  query Notifications {
-    notifications {
+  query Notifications($limit: Int, $offset: Int) {
+    notifications(limit: $limit, offset: $offset) {
       id
       user {
         name
@@ -32,8 +32,13 @@ export const NOTIFICATION_SUBSCRIPTION = gql`
   }
 `;
 
-export const MARK_AS_READ_MUTATION = gql`
-  mutation MarkNotificationAsRead($id: ID!) {
-    markNotificationAsRead(id: $id)
+/**
+ * Mark a single notification or all notifications as read.
+ * Pass { id, all: false } for a single notification.
+ * Pass { all: true } to clear all.
+ */
+export const MARK_NOTIFICATION_READ = gql`
+  mutation MarkNotificationRead($id: ID, $all: Boolean) {
+    markNotificationRead(id: $id, all: $all)
   }
 `;
