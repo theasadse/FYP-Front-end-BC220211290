@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Form,
   Input,
@@ -8,7 +8,6 @@ import {
   Card,
   Typography,
   Layout,
-  Space,
 } from "antd";
 import { useMutation, useQuery } from "@apollo/client";
 import { REGISTER } from "../graphql/operations/auth";
