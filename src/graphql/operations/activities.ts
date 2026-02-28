@@ -8,16 +8,19 @@ import { gql } from "@apollo/client";
 /**
  * Query to fetch a list of activities.
  *
- * @param {number} [limit] - The maximum number of activities to return.
- * @returns {object} The list of activities with their details (id, user, type, timestamp, status, metadata).
+ * @param {ID}     [userId] - Filter by user ID.
+ * @param {String} [status] - Filter by status (Completed | Pending | In Progress | Overdue).
+ * @param {Int}    [limit]  - Max number of activities to return.
+ * @returns {object} The list of activities with their details.
  */
 export const ACTIVITIES = gql`
-  query Activities($limit: Int) {
-    activities(limit: $limit) {
+  query Activities($userId: ID, $status: String, $limit: Int) {
+    activities(userId: $userId, status: $status, limit: $limit) {
       id
       user {
         id
         name
+        email
       }
       type
       timestamp

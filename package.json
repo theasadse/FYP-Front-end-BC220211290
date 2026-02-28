@@ -17,6 +17,7 @@
     "@ant-design/icons": "^5.1.0",
     "@apollo/client": "^3.8.0",
     "antd": "^5.9.0",
+    "dayjs": "^1.11.19",
     "express": "^5.1.0",
     "graphql": "^16.6.0",
     "graphql-ws": "^6.0.6",

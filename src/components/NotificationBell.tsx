@@ -45,7 +45,7 @@ export default function NotificationBell() {
 
     const unsubscribe = subscribeToMore({
       document: NOTIFICATION_SUBSCRIPTION,
-      updateQuery: (prev, { subscriptionData }) => {
+      updateQuery: (prev: any, { subscriptionData }: any) => {
         if (!subscriptionData.data) return prev;
         const newNotification = subscriptionData.data.notificationReceived;
 

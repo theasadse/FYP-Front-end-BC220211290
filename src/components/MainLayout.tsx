@@ -20,6 +20,12 @@ import {
   TeamOutlined,
   SafetyCertificateOutlined,
   LogoutOutlined,
+  BookOutlined,
+  ReadOutlined,
+  QuestionCircleOutlined,
+  FormOutlined,
+  SolutionOutlined,
+  NotificationOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
@@ -29,12 +35,30 @@ const { Header, Sider, Content } = Layout;
 
 const items = [
   { key: "/admin", label: "Dashboard", icon: <DashboardOutlined /> },
+  { key: "/admin/my-courses", label: "My Courses", icon: <ReadOutlined /> },
+  {
+    key: "/admin/queries",
+    label: "Student Queries",
+    icon: <QuestionCircleOutlined />,
+  },
+  { key: "/admin/assignments", label: "Assignments", icon: <FormOutlined /> },
+  {
+    key: "/admin/enrollments",
+    label: "Enrollments",
+    icon: <SolutionOutlined />,
+  },
+  {
+    key: "/admin/announcements",
+    label: "Announcements",
+    icon: <NotificationOutlined />,
+  },
   {
     key: "/admin/activities",
     label: "Activities",
     icon: <UnorderedListOutlined />,
   },
   { key: "/admin/reports", label: "Reports", icon: <FileTextOutlined /> },
+  { key: "/admin/courses", label: "Courses (Admin)", icon: <BookOutlined /> },
   { key: "/admin/users", label: "Users", icon: <TeamOutlined /> },
   { key: "/admin/roles", label: "Roles", icon: <SafetyCertificateOutlined /> },
 ];

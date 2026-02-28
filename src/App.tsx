@@ -14,6 +14,12 @@ import { ApolloProvider } from "@apollo/client";
 import apolloClient from "./graphql/apolloClient";
 import ActivitiesPage from "./pages/ActivitiesPage";
 import ReportsPage from "./pages/ReportsPage";
+import CoursesPage from "./pages/CoursesPage";
+import MyCoursesPage from "./pages/MyCoursesPage";
+import StudentQueriesPage from "./pages/StudentQueriesPage";
+import AssignmentsPage from "./pages/AssignmentsPage";
+import EnrollmentsPage from "./pages/EnrollmentsPage";
+import AnnouncementsPage from "./pages/AnnouncementsPage";
 
 /**
  * Guards private routes — redirects to /login when not authenticated.
@@ -88,9 +94,15 @@ export default function App() {
             {/* Protected admin routes — nested so sub-paths match exactly */}
             <Route path="/admin" element={<AdminRoutes />}>
               <Route index element={<AdminDashboard />} />
-              <Route path="users" element={<UsersPage />} />
+              <Route path="courses" element={<CoursesPage />} />
+              <Route path="my-courses" element={<MyCoursesPage />} />
+              <Route path="queries" element={<StudentQueriesPage />} />
+              <Route path="assignments" element={<AssignmentsPage />} />
+              <Route path="enrollments" element={<EnrollmentsPage />} />
+              <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="activities" element={<ActivitiesPage />} />
               <Route path="reports" element={<ReportsPage />} />
+              <Route path="users" element={<UsersPage />} />
               <Route path="roles" element={<RolesPage />} />
             </Route>
 
