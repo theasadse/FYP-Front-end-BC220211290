@@ -8,24 +8,27 @@
 
 ## Table of Contents
 
+- [Full GraphQL Schema](#full-graphql-schema)
+
 1. [Authentication](#1--authentication)
 2. [User & Role Management](#2--user--role-management)
 3. [Course Management (Admin)](#3--course-management-admin)
 4. [Instructor Course Management](#4--instructor-course-management)
-5. [Student Queries & Responses](#5--student-queries--responses)
-6. [Assignments](#6--assignments)
-7. [Enrollments & Grading](#7--enrollments--grading)
-8. [Announcements](#8--announcements)
-9. [Activity Logging & Tracking](#9--activity-logging--tracking)
-10. [Dashboard & Statistics](#10--dashboard--statistics)
-11. [Notifications](#11--notifications)
-12. [Reports](#12--reports)
-13. [Subscriptions (Real-time)](#13--subscriptions-real-time)
-14. [Object Types](#14--object-types)
-15. [Input Types](#15--input-types)
-16. [Error Reference](#16--error-reference)
-17. [Environment Variables](#17--environment-variables)
-18. [Seed & Demo Data](#18--seed--demo-data)
+5. [Student Course Management](#5--student-course-management)
+6. [Student Queries & Responses](#6--student-queries--responses)
+7. [Assignments](#7--assignments)
+8. [Enrollments & Grading](#8--enrollments--grading)
+9. [Announcements](#9--announcements)
+10. [Activity Logging & Tracking](#10--activity-logging--tracking)
+11. [Dashboard & Statistics](#11--dashboard--statistics)
+12. [Notifications](#12--notifications)
+13. [Reports](#13--reports)
+14. [Subscriptions (Real-time)](#14--subscriptions-real-time)
+15. [Object Types](#15--object-types)
+16. [Input Types](#16--input-types)
+17. [Error Reference](#17--error-reference)
+18. [Environment Variables](#18--environment-variables)
+19. [Seed & Demo Data](#19--seed--demo-data)
 
 ---
 
@@ -82,6 +85,7 @@ For WebSocket subscriptions, pass the token in connection params:
 | Users & Roles         | 3       | 6         | —             | 9      |
 | Courses (Admin)       | 2       | 4         | —             | 6      |
 | Instructor Management | 6       | 1         | —             | 7      |
+| Student Management    | 2       | 1         | —             | 3      |
 | Student Queries       | 1       | 2         | 1             | 4      |
 | Assignments           | 1       | 2         | —             | 3      |
 | Enrollments           | 1       | 1         | —             | 2      |
@@ -90,7 +94,385 @@ For WebSocket subscriptions, pass the token in connection params:
 | Dashboard             | 1       | —         | —             | 1      |
 | Notifications         | 1       | 2         | 1             | 4      |
 | Reports               | 2       | 3         | —             | 5      |
-| **TOTAL**             | **23**  | **27**    | **4**         | **54** |
+| **TOTAL**             | **25**  | **28**    | **4**         | **57** |
+
+---
+
+## Full GraphQL Schema
+
+The complete schema definition used by the backend (`src/graphql/typeDefs.ts`):
+
+```graphql
+scalar JSON
+
+# ─── Object Types ─────────────────────────────────────────
+
+type Role {
+  id: ID!
+  name: String!
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  role: Role!
+}
+
+type Activity {
+  id: ID!
+  user: User!
+  type: String!
+  timestamp: String!
+  status: String!
+  metadata: JSON
+}
+
+type Course {
+  id: ID!
+  title: String!
+  code: String!
+  description: String
+  credits: Int!
+  semester: String
+  schedule: String
+  enrolledStudentCount: Int!
+  instructor: User
+  createdAt: String!
+  updatedAt: String!
+  assignments: [Assignment!]
+  announcements: [CourseAnnouncement!]
+  studentQueries: [StudentQuery!]
+  enrollments: [Enrollment!]
+}
+
+type Enrollment {
+  id: ID!
+  course: Course!
+  student: User!
+  enrolledAt: String!
+  grade: String
+  attendance: Float!
+}
+
+type StudentQuery {
+  id: ID!
+  course: Course!
+  student: User!
+  subject: String!
+  message: String!
+  status: String! # "Open" | "Answered" | "Closed"
+  priority: String! # "Low" | "Normal" | "High" | "Urgent"
+  category: String! # "General" | "Assignment" | "Exam" | "Technical" | "Other"
+  createdAt: String!
+  updatedAt: String!
+  responses: [InstructorResponse!]
+}
+
+type InstructorResponse {
+  id: ID!
+  query: StudentQuery!
+  instructor: User!
+  message: String!
+  createdAt: String!
+}
+
+type CourseAnnouncement {
+  id: ID!
+  course: Course!
+  instructor: User!
+  title: String!
+  content: String!
+  priority: String! # "Low" | "Normal" | "High" | "Urgent"
+  createdAt: String!
+}
+
+type Assignment {
+  id: ID!
+  course: Course!
+  title: String!
+  description: String
+  dueDate: String!
+  totalMarks: Int!
+  status: String! # "Active" | "Closed" | "Graded"
+  submissions: Int!
+  createdAt: String!
+}
+
+type InstructorDashboard {
+  totalCourses: Int!
+  totalStudents: Int!
+  openQueries: Int!
+  pendingAssignments: Int!
+  averageAttendance: Float!
+  courseBreakdown: [CourseStats!]!
+  recentQueries: [StudentQuery!]!
+  upcomingDeadlines: [Assignment!]!
+}
+
+type CourseStats {
+  courseId: ID!
+  courseTitle: String!
+  courseCode: String!
+  studentCount: Int!
+  openQueries: Int!
+  averageAttendance: Float!
+  assignmentsDue: Int!
+}
+
+type Notification {
+  id: ID!
+  user: User!
+  message: String!
+  isRead: Boolean!
+  createdAt: String!
+  metadata: JSON
+}
+
+type Report {
+  id: ID!
+  user: User!
+  start_date: String!
+  end_date: String!
+  type: String!
+  content: JSON
+}
+
+type DashboardStats {
+  totalActivities: Int!
+  completedActivities: Int!
+  pendingActivities: Int!
+  perType: [ActivityTypeCount!]!
+}
+
+type ActivityTypeCount {
+  type: String!
+  count: Int!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+type DeadlineCheckResult {
+  processed: Int!
+  notificationsSent: Int!
+}
+
+# ─── Input Types ──────────────────────────────────────────
+
+input RegisterInput {
+  name: String!
+  email: String!
+  password: String!
+  roleName: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input LogActivityInput {
+  userId: ID!
+  type: String!
+  metadata: JSON
+}
+
+input ActivityInput {
+  userId: ID!
+  type: String!
+  status: String
+  metadata: JSON
+}
+
+input CreateUserInput {
+  name: String!
+  email: String!
+  password: String!
+  roleName: String!
+}
+
+input UpdateUserInput {
+  name: String
+  email: String
+  password: String
+  roleName: String
+}
+
+input CreateCourseInput {
+  title: String!
+  code: String!
+  description: String
+  credits: Int
+  semester: String
+  schedule: String
+  instructorId: ID
+}
+
+input UpdateCourseInput {
+  title: String
+  description: String
+  credits: Int
+  semester: String
+  schedule: String
+}
+
+input RespondToQueryInput {
+  queryId: ID!
+  message: String!
+}
+
+input PostAnnouncementInput {
+  courseId: ID!
+  title: String!
+  content: String!
+  priority: String # "Low" | "Normal" | "High" | "Urgent" — defaults to "Normal"
+}
+
+input CreateAssignmentInput {
+  courseId: ID!
+  title: String!
+  description: String
+  dueDate: String!
+  totalMarks: Int # defaults to 100
+}
+
+input UpdateAssignmentInput {
+  title: String
+  description: String
+  dueDate: String
+  totalMarks: Int
+  status: String # "Active" | "Closed" | "Graded"
+}
+
+input UpdateEnrollmentGradeInput {
+  enrollmentId: ID!
+  grade: String! # A, A-, B+, B, B-, C+, C, C-, D, F
+}
+
+input CreateReportInput {
+  userId: ID!
+  startDate: String!
+  endDate: String!
+  type: String!
+}
+
+input UpdateReportInput {
+  startDate: String!
+  endDate: String!
+  type: String!
+}
+
+input SubmitQueryInput {
+  courseId: ID!
+  subject: String!
+  message: String!
+  priority: String # "Low" | "Normal" (default) | "High" | "Urgent"
+  category: String # "General" (default) | "Assignment" | "Exam" | "Technical" | "Other"
+}
+
+# ─── Root Query ───────────────────────────────────────────
+
+type Query {
+  # Auth
+  me: User
+
+  # Users & Roles
+  users: [User!]!
+  user(id: ID!): User
+  roles: [Role!]!
+
+  # Activities
+  activities(userId: ID, status: String, limit: Int): [Activity!]!
+  activity(id: ID!): Activity
+  getActivities(userId: ID, limit: Int): [Activity!]!
+
+  # Notifications
+  notifications(limit: Int, offset: Int): [Notification!]!
+
+  # Reports
+  reports(userId: ID): [Report!]!
+  report(id: ID!): Report
+
+  # Course Management
+  courses: [Course!]!
+  course(id: ID!): Course
+
+  # Instructor Course Management
+  myCourses: [Course!]!
+  courseStudentQueries(courseId: ID!, status: String): [StudentQuery!]!
+  courseEnrollments(courseId: ID!): [Enrollment!]!
+  courseAssignments(courseId: ID!): [Assignment!]!
+  courseAnnouncements(courseId: ID!): [CourseAnnouncement!]!
+  instructorDashboard: InstructorDashboard!
+  studentQuery(id: ID!): StudentQuery
+
+  # Student Course Management
+  myQueries(courseId: ID, status: String): [StudentQuery!]!
+  myEnrollments: [Enrollment!]!
+
+  # Dashboard
+  getDashboardStats: DashboardStats!
+}
+
+# ─── Root Mutation ────────────────────────────────────────
+
+type Mutation {
+  # Auth
+  register(input: RegisterInput!): AuthPayload!
+  login(input: LoginInput!): AuthPayload!
+
+  # Activity
+  logActivity(input: LogActivityInput!): Activity!
+  updateActivity(id: ID!, input: ActivityInput!): Activity!
+  deleteActivity(id: ID!): Boolean!
+
+  # User & Role Management
+  createUser(input: CreateUserInput!): User!
+  updateUser(id: ID!, input: UpdateUserInput!): User!
+  deleteUser(id: ID!): Boolean!
+  createRole(name: String!): Role!
+  updateRole(id: ID!, name: String!): Role!
+  deleteRole(id: ID!): Boolean!
+
+  # Notifications
+  markNotificationRead(id: ID, all: Boolean): Boolean!
+  checkDeadlines: DeadlineCheckResult!
+
+  # Reports
+  createReport(input: CreateReportInput!): Report!
+  updateReport(id: ID!, input: UpdateReportInput!): Report!
+  deleteReport(id: ID!): Report!
+
+  # Course Management (Admin)
+  createCourse(input: CreateCourseInput!): Course!
+  updateCourse(id: ID!, input: UpdateCourseInput!): Course!
+  assignInstructor(courseId: ID!, instructorId: ID!): Course!
+  removeInstructor(courseId: ID!): Course!
+
+  # Student Course Management
+  submitQuery(input: SubmitQueryInput!): StudentQuery!
+
+  # Instructor Course Management
+  respondToQuery(input: RespondToQueryInput!): InstructorResponse!
+  closeQuery(id: ID!): StudentQuery!
+  postAnnouncement(input: PostAnnouncementInput!): CourseAnnouncement!
+  createAssignment(input: CreateAssignmentInput!): Assignment!
+  updateAssignment(id: ID!, input: UpdateAssignmentInput!): Assignment!
+  updateEnrollmentGrade(input: UpdateEnrollmentGradeInput!): Enrollment!
+}
+
+# ─── Root Subscription ───────────────────────────────────
+
+type Subscription {
+  newActivityLogged: Activity!
+  notificationReceived: Notification!
+  newStudentQuery(courseId: ID): StudentQuery!
+  newQueryResponse(queryId: ID!): InstructorResponse!
+}
+```
 
 ---
 
@@ -930,9 +1312,158 @@ query CourseAnnouncements($courseId: ID!) {
 
 ---
 
-# 5 — Student Queries & Responses
+# 5 — Student Course Management
 
-### 5.1 `respondToQuery` (Mutation) ⭐
+### 5.1 `myEnrollments` (Query) ⭐
+
+```graphql
+query MyEnrollments {
+  myEnrollments {
+    id
+    grade
+    attendance
+    enrolledAt
+    student {
+      id
+      name
+      email
+    }
+    course {
+      id
+      code
+      title
+      description
+      credits
+      semester
+      schedule
+      instructor {
+        id
+        name
+        email
+      }
+      assignments {
+        id
+        title
+        dueDate
+        status
+      }
+      announcements {
+        id
+        title
+        priority
+        createdAt
+      }
+    }
+  }
+}
+```
+
+- **Auth:** Required (any role — returns enrollments for the logged-in user)
+- **Returns:** All courses the student is enrolled in, with grades, attendance, assignments, and announcements
+
+---
+
+### 5.2 `myQueries` (Query) ⭐
+
+```graphql
+query MyQueries($courseId: ID, $status: String) {
+  myQueries(courseId: $courseId, status: $status) {
+    id
+    subject
+    message
+    status
+    priority
+    category
+    createdAt
+    updatedAt
+    course {
+      id
+      code
+      title
+    }
+    student {
+      id
+      name
+    }
+    responses {
+      id
+      message
+      createdAt
+      instructor {
+        id
+        name
+      }
+    }
+  }
+}
+```
+
+**Variables:**
+
+```json
+{ "courseId": "<course-uuid>", "status": "Open" }
+```
+
+- **Auth:** Required (returns only the logged-in student's queries)
+- **Filters:** Both `courseId` and `status` are optional
+- **`status` values:** `Open` | `Answered` | `Closed` | omit for all
+
+---
+
+### 5.3 `submitQuery` (Mutation) ⭐
+
+```graphql
+mutation SubmitQuery($input: SubmitQueryInput!) {
+  submitQuery(input: $input) {
+    id
+    subject
+    message
+    status
+    priority
+    category
+    createdAt
+    course {
+      id
+      code
+      title
+    }
+    student {
+      id
+      name
+    }
+  }
+}
+```
+
+**Variables:**
+
+```json
+{
+  "input": {
+    "courseId": "<course-uuid>",
+    "subject": "Need help with lab assignment",
+    "message": "I am stuck on the socket programming exercise. Can you help?",
+    "priority": "High",
+    "category": "Assignment"
+  }
+}
+```
+
+- **Auth:** Required (student must be enrolled in the course)
+- **`priority`:** `Low` | `Normal` (default) | `High` | `Urgent`
+- **`category`:** `General` (default) | `Assignment` | `Exam` | `Technical` | `Other`
+- **Side effects:**
+  - Creates a notification for the course instructor
+  - Publishes `newStudentQuery` subscription
+- **Errors:**
+  - `You are not enrolled in this course` — student not enrolled
+  - `This course has no assigned instructor` — course has no instructor
+
+---
+
+# 6 — Student Queries & Responses
+
+### 6.1 `respondToQuery` (Mutation) ⭐
 
 ```graphql
 mutation RespondToQuery($input: RespondToQueryInput!) {
@@ -978,7 +1509,7 @@ mutation RespondToQuery($input: RespondToQueryInput!) {
 
 ---
 
-### 5.2 `closeQuery` (Mutation)
+### 6.2 `closeQuery` (Mutation)
 
 ```graphql
 mutation CloseQuery($id: ID!) {
@@ -1005,9 +1536,9 @@ mutation CloseQuery($id: ID!) {
 
 ---
 
-# 6 — Assignments
+# 7 — Assignments
 
-### 6.1 `createAssignment` (Mutation)
+### 7.1 `createAssignment` (Mutation)
 
 ```graphql
 mutation CreateAssignment($input: CreateAssignmentInput!) {
@@ -1046,7 +1577,7 @@ mutation CreateAssignment($input: CreateAssignmentInput!) {
 
 ---
 
-### 6.2 `updateAssignment` (Mutation)
+### 7.2 `updateAssignment` (Mutation)
 
 ```graphql
 mutation UpdateAssignment($id: ID!, $input: UpdateAssignmentInput!) {
@@ -1084,9 +1615,9 @@ mutation UpdateAssignment($id: ID!, $input: UpdateAssignmentInput!) {
 
 ---
 
-# 7 — Enrollments & Grading
+# 8 — Enrollments & Grading
 
-### 7.1 `updateEnrollmentGrade` (Mutation) ⭐
+### 8.1 `updateEnrollmentGrade` (Mutation) ⭐
 
 ```graphql
 mutation UpdateEnrollmentGrade($input: UpdateEnrollmentGradeInput!) {
@@ -1124,9 +1655,9 @@ mutation UpdateEnrollmentGrade($input: UpdateEnrollmentGradeInput!) {
 
 ---
 
-# 8 — Announcements
+# 9 — Announcements
 
-### 8.1 `postAnnouncement` (Mutation) ⭐
+### 9.1 `postAnnouncement` (Mutation) ⭐
 
 ```graphql
 mutation PostAnnouncement($input: PostAnnouncementInput!) {
@@ -1168,9 +1699,9 @@ mutation PostAnnouncement($input: PostAnnouncementInput!) {
 
 ---
 
-# 9 — Activity Logging & Tracking
+# 10 — Activity Logging & Tracking
 
-### 9.1 `activities` (Query)
+### 10.1 `activities` (Query)
 
 ```graphql
 query Activities($userId: ID, $status: String, $limit: Int) {
@@ -1200,7 +1731,7 @@ query Activities($userId: ID, $status: String, $limit: Int) {
 
 ---
 
-### 9.2 `activity` (Query)
+### 10.2 `activity` (Query)
 
 ```graphql
 query Activity($id: ID!) {
@@ -1221,7 +1752,7 @@ query Activity($id: ID!) {
 
 ---
 
-### 9.3 `getActivities` (Query)
+### 10.3 `getActivities` (Query)
 
 ```graphql
 query GetActivities($userId: ID, $limit: Int) {
@@ -1245,7 +1776,7 @@ query GetActivities($userId: ID, $limit: Int) {
 
 ---
 
-### 9.4 `logActivity` (Mutation) ⭐
+### 10.4 `logActivity` (Mutation) ⭐
 
 ```graphql
 mutation LogActivity($input: LogActivityInput!) {
@@ -1309,7 +1840,7 @@ mutation LogActivity($input: LogActivityInput!) {
 
 ---
 
-### 9.5 `updateActivity` (Mutation)
+### 10.5 `updateActivity` (Mutation)
 
 ```graphql
 mutation UpdateActivity($id: ID!, $input: ActivityInput!) {
@@ -1341,7 +1872,7 @@ mutation UpdateActivity($id: ID!, $input: ActivityInput!) {
 
 ---
 
-### 9.6 `deleteActivity` (Mutation)
+### 10.6 `deleteActivity` (Mutation)
 
 ```graphql
 mutation DeleteActivity($id: ID!) {
@@ -1354,9 +1885,9 @@ mutation DeleteActivity($id: ID!) {
 
 ---
 
-# 10 — Dashboard & Statistics
+# 11 — Dashboard & Statistics
 
-### 10.1 `getDashboardStats` (Query) ⭐
+### 11.1 `getDashboardStats` (Query) ⭐
 
 ```graphql
 query GetDashboardStats {
@@ -1397,9 +1928,9 @@ query GetDashboardStats {
 
 ---
 
-# 11 — Notifications
+# 12 — Notifications
 
-### 11.1 `notifications` (Query)
+### 12.1 `notifications` (Query)
 
 ```graphql
 query Notifications($limit: Int, $offset: Int) {
@@ -1427,7 +1958,7 @@ query Notifications($limit: Int, $offset: Int) {
 
 ---
 
-### 11.2 `checkDeadlines` (Mutation) ⭐
+### 12.2 `checkDeadlines` (Mutation) ⭐
 
 ```graphql
 mutation CheckDeadlines {
@@ -1444,7 +1975,7 @@ mutation CheckDeadlines {
 
 ---
 
-### 11.3 `markNotificationRead` (Mutation)
+### 12.3 `markNotificationRead` (Mutation)
 
 ```graphql
 mutation MarkNotificationRead($id: ID, $all: Boolean) {
@@ -1468,9 +1999,9 @@ Mark all as read ("Clear all" button):
 
 ---
 
-# 12 — Reports
+# 13 — Reports
 
-### 12.1 `reports` (Query)
+### 13.1 `reports` (Query)
 
 ```graphql
 query Reports($userId: ID) {
@@ -1493,7 +2024,7 @@ query Reports($userId: ID) {
 
 ---
 
-### 12.2 `report` (Query)
+### 13.2 `report` (Query)
 
 ```graphql
 query Report($id: ID!) {
@@ -1513,7 +2044,7 @@ query Report($id: ID!) {
 
 ---
 
-### 12.3 `createReport` (Mutation) ⭐
+### 13.3 `createReport` (Mutation) ⭐
 
 ```graphql
 mutation CreateReport($input: CreateReportInput!) {
@@ -1569,7 +2100,7 @@ mutation CreateReport($input: CreateReportInput!) {
 
 ---
 
-### 12.4 `updateReport` (Mutation)
+### 13.4 `updateReport` (Mutation)
 
 ```graphql
 mutation UpdateReport($id: ID!, $input: UpdateReportInput!) {
@@ -1597,7 +2128,7 @@ mutation UpdateReport($id: ID!, $input: UpdateReportInput!) {
 
 ---
 
-### 12.5 `deleteReport` (Mutation)
+### 13.5 `deleteReport` (Mutation)
 
 ```graphql
 mutation DeleteReport($id: ID!) {
@@ -1611,7 +2142,7 @@ mutation DeleteReport($id: ID!) {
 
 ---
 
-# 13 — Subscriptions (Real-time)
+# 14 — Subscriptions (Real-time)
 
 All subscriptions use **WebSocket** at `ws://localhost:4000/graphql` with `graphql-ws` protocol.
 
@@ -1621,7 +2152,7 @@ Pass auth token in connection params:
 { "Authorization": "Bearer <token>" }
 ```
 
-### 13.1 `notificationReceived` ⭐
+### 14.1 `notificationReceived` ⭐
 
 ```graphql
 subscription NotificationReceived {
@@ -1644,7 +2175,7 @@ subscription NotificationReceived {
 
 ---
 
-### 13.2 `newActivityLogged`
+### 14.2 `newActivityLogged`
 
 ```graphql
 subscription NewActivityLogged {
@@ -1665,7 +2196,7 @@ subscription NewActivityLogged {
 
 ---
 
-### 13.3 `newStudentQuery`
+### 14.3 `newStudentQuery`
 
 ```graphql
 subscription NewStudentQuery($courseId: ID) {
@@ -1695,7 +2226,7 @@ subscription NewStudentQuery($courseId: ID) {
 
 ---
 
-### 13.4 `newQueryResponse`
+### 14.4 `newQueryResponse`
 
 ```graphql
 subscription NewQueryResponse($queryId: ID!) {
@@ -1721,7 +2252,7 @@ subscription NewQueryResponse($queryId: ID!) {
 
 ---
 
-# 14 — Object Types
+# 15 — Object Types
 
 ```graphql
 type User {
@@ -1880,7 +2411,7 @@ type DeadlineCheckResult {
 
 ---
 
-# 15 — Input Types
+# 16 — Input Types
 
 ```graphql
 input LoginInput {
@@ -1985,29 +2516,39 @@ input UpdateReportInput {
   endDate: String!
   type: String!
 }
+
+input SubmitQueryInput {
+  courseId: ID!
+  subject: String!
+  message: String!
+  priority: String # "Low" | "Normal" (default) | "High" | "Urgent"
+  category: String # "General" (default) | "Assignment" | "Exam" | "Technical" | "Other"
+}
 ```
 
 ---
 
-# 16 — Error Reference
+# 17 — Error Reference
 
-| Message                                        | Cause                                               |
-| ---------------------------------------------- | --------------------------------------------------- |
-| `Not authenticated`                            | Missing or expired JWT                              |
-| `Forbidden`                                    | Role too low for the operation                      |
-| `Must be an instructor`                        | Tried instructor-only query without INSTRUCTOR role |
-| `You are not the instructor for this course`   | Tried to manage a course not assigned to you        |
-| `Forbidden to log for other users`             | Logging activity for a different user without ADMIN |
-| `Invalid credentials`                          | Wrong email or password                             |
-| `Not found`                                    | Resource with given ID does not exist               |
-| `Student query not found`                      | Invalid student query ID                            |
-| `Assignment not found`                         | Invalid assignment ID                               |
-| `Enrollment not found`                         | Invalid enrollment ID for grading                   |
-| `Course not found`                             | Invalid course ID                                   |
-| `Query not found`                              | Invalid student query ID                            |
-| `Invalid grade`                                | Grade not in: A, A-, B+, B, B-, C+, C, C-, D, F     |
-| `Cannot delete role: N user(s) still assigned` | Attempted to delete a role with active users        |
-| `Notification not found`                       | `markNotificationRead` given bad ID                 |
+| Message                                        | Cause                                                |
+| ---------------------------------------------- | ---------------------------------------------------- |
+| `Not authenticated`                            | Missing or expired JWT                               |
+| `Forbidden`                                    | Role too low for the operation                       |
+| `Must be an instructor`                        | Tried instructor-only query without INSTRUCTOR role  |
+| `You are not the instructor for this course`   | Tried to manage a course not assigned to you         |
+| `Forbidden to log for other users`             | Logging activity for a different user without ADMIN  |
+| `Invalid credentials`                          | Wrong email or password                              |
+| `Not found`                                    | Resource with given ID does not exist                |
+| `Student query not found`                      | Invalid student query ID                             |
+| `Assignment not found`                         | Invalid assignment ID                                |
+| `Enrollment not found`                         | Invalid enrollment ID for grading                    |
+| `Course not found`                             | Invalid course ID                                    |
+| `Query not found`                              | Invalid student query ID                             |
+| `Invalid grade`                                | Grade not in: A, A-, B+, B, B-, C+, C, C-, D, F      |
+| `Cannot delete role: N user(s) still assigned` | Attempted to delete a role with active users         |
+| `Notification not found`                       | `markNotificationRead` given bad ID                  |
+| `You are not enrolled in this course`          | Student tried to submit query for unenrolled course  |
+| `This course has no assigned instructor`       | Student submitted query but course has no instructor |
 
 All errors follow standard GraphQL format:
 
@@ -2025,7 +2566,7 @@ All errors follow standard GraphQL format:
 
 ---
 
-# 17 — Environment Variables
+# 18 — Environment Variables
 
 | Variable       | Description                     | Default        |
 | -------------- | ------------------------------- | -------------- |
@@ -2038,7 +2579,7 @@ All errors follow standard GraphQL format:
 
 ---
 
-# 18 — Seed & Demo Data
+# 19 — Seed & Demo Data
 
 ```bash
 # Basic roles + admin user

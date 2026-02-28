@@ -20,6 +20,8 @@ import StudentQueriesPage from "./pages/StudentQueriesPage";
 import AssignmentsPage from "./pages/AssignmentsPage";
 import EnrollmentsPage from "./pages/EnrollmentsPage";
 import AnnouncementsPage from "./pages/AnnouncementsPage";
+import MyEnrollmentsPage from "./pages/MyEnrollmentsPage";
+import MyQueriesPage from "./pages/MyQueriesPage";
 
 /**
  * Guards private routes — redirects to /login when not authenticated.
@@ -100,6 +102,8 @@ export default function App() {
               <Route path="assignments" element={<AssignmentsPage />} />
               <Route path="enrollments" element={<EnrollmentsPage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
+              <Route path="my-enrollments" element={<MyEnrollmentsPage />} />
+              <Route path="my-queries" element={<MyQueriesPage />} />
               <Route path="activities" element={<ActivitiesPage />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="users" element={<UsersPage />} />

@@ -18,6 +18,7 @@ export const REPORTS = gql`
       user {
         id
         name
+        email
       }
       start_date
       end_date

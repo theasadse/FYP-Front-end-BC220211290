@@ -24,6 +24,8 @@ import {
   ReadOutlined,
   QuestionCircleOutlined,
   FormOutlined,
+  InboxOutlined,
+  ContainerOutlined,
   SolutionOutlined,
   NotificationOutlined,
 } from "@ant-design/icons";
@@ -33,35 +35,83 @@ import NotificationBell from "./NotificationBell";
 
 const { Header, Sider, Content } = Layout;
 
-const items = [
-  { key: "/admin", label: "Dashboard", icon: <DashboardOutlined /> },
-  { key: "/admin/my-courses", label: "My Courses", icon: <ReadOutlined /> },
-  {
-    key: "/admin/queries",
-    label: "Student Queries",
-    icon: <QuestionCircleOutlined />,
-  },
-  { key: "/admin/assignments", label: "Assignments", icon: <FormOutlined /> },
-  {
-    key: "/admin/enrollments",
-    label: "Enrollments",
-    icon: <SolutionOutlined />,
-  },
-  {
-    key: "/admin/announcements",
-    label: "Announcements",
-    icon: <NotificationOutlined />,
-  },
-  {
-    key: "/admin/activities",
-    label: "Activities",
-    icon: <UnorderedListOutlined />,
-  },
-  { key: "/admin/reports", label: "Reports", icon: <FileTextOutlined /> },
-  { key: "/admin/courses", label: "Courses (Admin)", icon: <BookOutlined /> },
-  { key: "/admin/users", label: "Users", icon: <TeamOutlined /> },
-  { key: "/admin/roles", label: "Roles", icon: <SafetyCertificateOutlined /> },
-];
+/**
+ * Build sidebar menu items based on the user's role.
+ * Role hierarchy from API:
+ *   SUPER_ADMIN (4) / ADMIN (3) → Everything
+ *   INSTRUCTOR (2)              → Own courses, activities, reports, student queries
+ *   STUDENT (1)                 → Enrolled courses, submit queries
+ *   VIEWER (1)                  → Read-only dashboard
+ */
+function getSidebarItems(role: string) {
+  const upper = (role || "").toUpperCase();
+
+  // Items visible to everyone
+  const common = [
+    { key: "/admin", label: "Dashboard", icon: <DashboardOutlined /> },
+  ];
+
+  // Student-specific
+  const studentItems = [
+    {
+      key: "/admin/my-enrollments",
+      label: "My Enrollments",
+      icon: <ContainerOutlined />,
+    },
+    { key: "/admin/my-queries", label: "My Queries", icon: <InboxOutlined /> },
+  ];
+
+  // Instructor-specific
+  const instructorItems = [
+    { key: "/admin/my-courses", label: "My Courses", icon: <ReadOutlined /> },
+    {
+      key: "/admin/queries",
+      label: "Student Queries",
+      icon: <QuestionCircleOutlined />,
+    },
+    { key: "/admin/assignments", label: "Assignments", icon: <FormOutlined /> },
+    {
+      key: "/admin/enrollments",
+      label: "Enrollments",
+      icon: <SolutionOutlined />,
+    },
+    {
+      key: "/admin/announcements",
+      label: "Announcements",
+      icon: <NotificationOutlined />,
+    },
+    {
+      key: "/admin/activities",
+      label: "Activities",
+      icon: <UnorderedListOutlined />,
+    },
+    { key: "/admin/reports", label: "Reports", icon: <FileTextOutlined /> },
+  ];
+
+  // Admin-only
+  const adminItems = [
+    { key: "/admin/courses", label: "Courses", icon: <BookOutlined /> },
+    { key: "/admin/users", label: "Users", icon: <TeamOutlined /> },
+    {
+      key: "/admin/roles",
+      label: "Roles",
+      icon: <SafetyCertificateOutlined />,
+    },
+  ];
+
+  if (upper === "SUPER_ADMIN" || upper === "ADMIN") {
+    // Admins see everything: instructor features + student features + admin features
+    return [...common, ...instructorItems, ...studentItems, ...adminItems];
+  }
+  if (upper === "INSTRUCTOR") {
+    return [...common, ...instructorItems];
+  }
+  if (upper === "STUDENT") {
+    return [...common, ...studentItems];
+  }
+  // VIEWER or unknown
+  return common;
+}
 
 /**
  * Main layout component for the application.
@@ -92,6 +142,12 @@ export default function MainLayout({
   // Handle both role as string and role as object
   const userRole =
     typeof user?.role === "string" ? user.role : user?.role?.name;
+
+  // Build role-aware sidebar items
+  const items = React.useMemo(
+    () => getSidebarItems(userRole || ""),
+    [userRole],
+  );
 
   const menu = (
     <Menu>
